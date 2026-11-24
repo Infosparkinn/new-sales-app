@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vyapar Sales App - Modern GST Billing, Inventory & Accounting for Desktop & Mobile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              500: '#10b981',
+              600: '#059669',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .gradient-mesh {
+      background: radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.10) 0%, transparent 40%),
+                  radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 60%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-500 selection:text-white transition-colors duration-200">
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
+          <i class="fa-solid fa-receipt text-xl"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-800">Vyapar App</span>
+          <span class="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Enterprise v2.0</span>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-600">
+        <a href="#features" class="hover:text-blue-600 transition">Features</a>
+        <a href="#modules" class="hover:text-blue-600 transition">Modules</a>
+        <a href="#reports" class="hover:text-blue-600 transition">Reports & Accounting</a>
+        <a href="#download" class="hover:text-blue-600 transition">Downloads</a>
+      </nav>
+
+      <div class="flex items-center space-x-3">
+        <a href="#download" class="inline-flex items-center px-4 py-2.5 rounded-xl font-semibold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+          <i class="fa-solid fa-download mr-2"></i> Get App
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden py-20 lg:py-28 gradient-mesh">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/60 text-blue-700 text-xs font-semibold uppercase tracking-wider mb-6 animate-pulse">
+        <i class="fa-solid fa-bolt text-amber-500"></i> Offline-First • Multi-Firm • GST Compliant
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight sm:leading-none">
+        The Complete <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600">Vyapar Suite</span> for Indian Businesses
+      </h1>
+
+      <p class="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-normal">
+        GST Invoicing, Inventory Tracking, Multi-Price Tiers, Fixed Assets, E-way Bills, WhatsApp Reminders, and Real-Time Balance Sheet reports for Android & Windows Desktop.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#download-apk" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-600/25 transition hover:-translate-y-0.5">
+          <i class="fa-brands fa-android text-2xl mr-3"></i>
+          <div class="text-left">
+            <div class="text-xs font-normal opacity-90">Download Release</div>
+            <div class="font-bold">Android APK (ARM64 & x86)</div>
+          </div>
+        </a>
+
+        <a href="#download-windows" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl shadow-blue-600/25 transition hover:-translate-y-0.5">
+          <i class="fa-brands fa-windows text-2xl mr-3"></i>
+          <div class="text-left">
+            <div class="text-xs font-normal opacity-90">Download Desktop</div>
+            <div class="font-bold">Windows x64 Native</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Tech Stack Badges -->
+      <div class="mt-12 flex flex-wrap items-center justify-center gap-3 text-xs font-medium text-slate-600">
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center gap-1.5"><i class="fa-brands fa-flutter text-blue-500"></i> Flutter 3.24</span>
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-database text-amber-500"></i> SQLite Offline DB</span>
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-file-pdf text-red-500"></i> Vector Tax PDF + UPI QR</span>
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center gap-1.5"><i class="fa-brands fa-whatsapp text-emerald-500"></i> WhatsApp Automated</span>
+        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-purple-500"></i> 100% Private & Local</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Highlight Stats -->
+  <section class="py-12 bg-white border-y border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div>
+          <div class="text-3xl font-extrabold text-blue-600">100%</div>
+          <div class="mt-1 text-sm font-medium text-slate-500">Offline Functionality</div>
+        </div>
+        <div>
+          <div class="text-3xl font-extrabold text-emerald-600">13 Tables</div>
+          <div class="mt-1 text-sm font-medium text-slate-500">Relational SQLite Schema</div>
+        </div>
+        <div>
+          <div class="text-3xl font-extrabold text-indigo-600">Zero Cost</div>
+          <div class="mt-1 text-sm font-medium text-slate-500">No Subscriptions / No Cloud Lock-in</div>
+        </div>
+        <div>
+          <div class="text-3xl font-extrabold text-purple-600">Cross-Platform</div>
+          <div class="mt-1 text-sm font-medium text-slate-500">Android & Windows Ready</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- All Requested Features Grid -->
+  <section id="features" class="py-20 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Comprehensive Capabilities</h2>
+        <p class="text-3xl sm:text-4xl font-extrabold text-slate-900">Every Single Enterprise Vyapar Feature Implemented</p>
+        <p class="mt-3 text-base text-slate-600">Built ground-up to give Indian merchants, distributors, and retailers complete financial mastery.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- 1. Multi Company -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-building"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Multiple Firms & Companies</h3>
+          <p class="mt-2 text-sm text-slate-600">Create, switch, and manage separate GSTINs, addresses, signatures, and bank profiles with complete multi-firm isolation.</p>
+        </div>
+
+        <!-- 2. E-way Bills -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-truck-fast"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Generate E-way Bills</h3>
+          <p class="mt-2 text-sm text-slate-600">Track E-way bill number, transporter ID, vehicle registration, and transportation distance directly embedded on invoices and PDF prints.</p>
+        </div>
+
+        <!-- 3. Recycle Bin -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-trash-arrow-up"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Restore Deleted Transactions</h3>
+          <p class="mt-2 text-sm text-slate-600">Soft-delete safeguard for invoices, expenses, and transactions. Restore any mistakenly deleted record with audit tracking.</p>
+        </div>
+
+        <!-- 4. Whitelabel / No Ads -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Remove Advertisement & Branding</h3>
+          <p class="mt-2 text-sm text-slate-600">Full control over invoice footer branding. Toggle custom business branding or clean white-label tax invoices with zero ads.</p>
+        </div>
+
+        <!-- 5. Multiple Pricing & Party Rates -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-tags"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Multiple Pricing Tiers & Party Rates</h3>
+          <p class="mt-2 text-sm text-slate-600">Set Retail, Wholesale, and Dealer pricing tiers per item. Remember custom negotiated special rates for specific parties.</p>
+        </div>
+
+        <!-- 6. Bulk Item Updates -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-table-cells"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Update Items in Bulk</h3>
+          <p class="mt-2 text-sm text-slate-600">Spreadsheet-style bulk price modifier and stock counting tool. Update hundreds of items with percentage increases or fixed shifts.</p>
+        </div>
+
+        <!-- 7. Credit Limits -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-credit-card"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Party Credit Limits & Warnings</h3>
+          <p class="mt-2 text-sm text-slate-600">Define maximum outstanding balances per party. Live banner warnings alert you whenever a sale exceeds a customer's credit cap.</p>
+        </div>
+
+        <!-- 8. Fixed Assets Register -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-cubes-stacked"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Fixed Assets Management</h3>
+          <p class="mt-2 text-sm text-slate-600">Register business assets (Vehicles, Machinery, IT, Furniture). Automatically computes depreciation and net book values for your Balance Sheet.</p>
+        </div>
+
+        <!-- 9. WhatsApp Reminders & Alerts -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Automated WhatsApp Connect</h3>
+          <p class="mt-2 text-sm text-slate-600">One-click WhatsApp payment reminders with UPI QR codes, instant bill delivery, self-notifications, and service maintenance reminders.</p>
+        </div>
+
+        <!-- 10. Combine Orders & Challans -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-file-invoice"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Convert Orders & Challans</h3>
+          <p class="mt-2 text-sm text-slate-600">Manage Delivery Challans and Quotations. Seamlessly convert pending orders into final GST Sales Invoices in one click.</p>
+        </div>
+
+        <!-- 11. TCS & TDS Engine -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-percent"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">TCS & TDS Tax Engine</h3>
+          <p class="mt-2 text-sm text-slate-600">Apply Tax Collected at Source (TCS) and Tax Deducted at Source (TDS) per statutory rules with real-time bill total adjustments.</p>
+        </div>
+
+        <!-- 12. Live Profit Margin on Invoices -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Live Profit on Invoices</h3>
+          <p class="mt-2 text-sm text-slate-600">Real-time profit preview shows purchase cost versus selling price margin percentage right as you build customer orders.</p>
+        </div>
+
+        <!-- 13. Expenses with ITC -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Expenses with Input Tax Credit (ITC)</h3>
+          <p class="mt-2 text-sm text-slate-600">Record operational expenses with vendor GSTIN and CGST/SGST breakdowns. Mark ITC eligibility for seamless GSTR-3B offsets.</p>
+        </div>
+
+        <!-- 14. Item Custom Fields & Batch Serial -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-700 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-barcode"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Custom Fields, Batch & Serial</h3>
+          <p class="mt-2 text-sm text-slate-600">Track Manufacturing & Expiry dates, Batch numbers, Serial numbers, and dynamic custom attributes on every inventory item.</p>
+        </div>
+
+        <!-- 15. Real-Time Balance Sheet & P&L -->
+        <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-scale-balanced"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Balance Sheet & P&L Reports</h3>
+          <p class="mt-2 text-sm text-slate-600">Automated double-entry Balance Sheet (Assets = Liabilities + Equity), Billwise Profit & Loss, Partywise Profit & Loss, and Item batch reports.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Downloads Section -->
+  <section id="download" class="py-20 bg-white border-t border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-2">Instant Offline Deployment</h2>
+        <p class="text-3xl sm:text-4xl font-extrabold text-slate-900">Download the Application</p>
+        <p class="mt-3 text-base text-slate-600">No account creation or mandatory cloud connectivity required. Download and run locally.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+
+        <!-- Android Release Card -->
+        <div id="download-apk" class="border border-slate-200 rounded-3xl p-8 bg-gradient-to-b from-white to-slate-50 shadow-lg hover:border-emerald-500/50 transition">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mb-6 shadow-inner">
+            <i class="fa-brands fa-android"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900">Android Release APK</h3>
+          <p class="mt-2 text-sm text-slate-600">Built for smartphones & tablets. Offline SQLite database, thermal printer Bluetooth support, and WhatsApp sharing.</p>
+
+          <ul class="mt-6 space-y-2.5 text-xs text-slate-600 font-medium">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Android 8.0 (Oreo) to Android 15 ready</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Standalone offline APK (~22MB)</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> WhatsApp direct invoice & reminder sharing</li>
+          </ul>
+
+          <div class="mt-8">
+            <a href="https://github.com/Infosparkinn/new-sales-app/releases/download/v1.0.0/vyapar_sales_app.apk" class="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition">
+              <i class="fa-solid fa-download mr-2"></i> Download vyapar_sales_app.apk
+            </a>
+            <div class="mt-2 text-center text-[11px] text-slate-400">SHA-256 verified release build</div>
+          </div>
+        </div>
+
+        <!-- Windows Desktop Card -->
+        <div id="download-windows" class="border border-slate-200 rounded-3xl p-8 bg-gradient-to-b from-white to-slate-50 shadow-lg hover:border-blue-500/50 transition">
+          <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mb-6 shadow-inner">
+            <i class="fa-brands fa-windows"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900">Windows Desktop Edition</h3>
+          <p class="mt-2 text-sm text-slate-600">Native Windows x64 desktop software. Optimized for high-speed POS billing, thermal barcode scanners, and laser printing.</p>
+
+          <ul class="mt-6 space-y-2.5 text-xs text-slate-600 font-medium">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-500"></i> Windows 10 & Windows 11 (64-bit)</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-500"></i> High-performance C++ Flutter runner</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-500"></i> Portable zip package ready to extract & run</li>
+          </ul>
+
+          <div class="mt-8">
+            <a href="https://github.com/Infosparkinn/new-sales-app/releases/download/v1.0.0/vyapar_windows_desktop.zip" class="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 transition">
+              <i class="fa-solid fa-file-zipper mr-2"></i> Download vyapar_windows_desktop.zip
+            </a>
+            <div class="mt-2 text-center text-[11px] text-slate-400">Portable Windows Bundle (No install required)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- GitHub & Source Code -->
+  <section class="py-16 bg-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-3xl mb-6">
+        <i class="fa-brands fa-github text-white"></i>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold">Open Architecture & Full Source Code</h2>
+      <p class="mt-3 text-slate-400 max-w-xl mx-auto text-sm">
+        Explore the clean architecture code, custom SQLite database migrations, PDF layout rendering engine, and Flutter state management.
+      </p>
+      <div class="mt-8">
+        <a href="https://github.com/Infosparkinn/new-sales-app" target="_blank" class="inline-flex items-center px-6 py-3 rounded-xl font-bold text-sm text-slate-900 bg-white hover:bg-slate-100 transition shadow-lg">
+          <i class="fa-brands fa-github mr-2 text-lg"></i> View on GitHub Repository
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 bg-slate-950 text-slate-500 text-xs border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        Vyapar Sales & Accounting App • Built with Flutter & SQLite.
+      </div>
+      <div class="flex items-center space-x-4">
+        <span>Offline First</span>
+        <span>•</span>
+        <span>GST Compliant</span>
+        <span>•</span>
+        <span>MIT License</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
