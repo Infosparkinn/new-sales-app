@@ -11,6 +11,11 @@ import 'transactions/add_payment_in_dialog.dart';
 import 'transactions/add_expense_dialog.dart';
 import 'billing/invoice_preview_screen.dart';
 import 'firms/firms_management_screen.dart';
+import '../widgets/vyapar_drawer.dart';
+import 'billing/mobile_pos_screen.dart';
+import 'purchase/purchase_management_screen.dart';
+import 'cash_bank/cash_bank_screen.dart';
+import 'reports/reports_hub_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final VoidCallback onNavigateToParties;
@@ -33,6 +38,7 @@ class DashboardScreen extends StatelessWidget {
     }
 
     return Scaffold(
+      drawer: const VyaparDrawer(),
       appBar: AppBar(
         title: InkWell(
           onTap: () {
@@ -183,6 +189,58 @@ class DashboardScreen extends StatelessWidget {
                     icon: Icons.add_box_rounded,
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const AddItemScreen()));
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    context: context,
+                    label: "Mobile POS",
+                    color: Colors.teal.shade700,
+                    icon: Icons.point_of_sale_rounded,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MobilePosScreen()));
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildActionButton(
+                    context: context,
+                    label: "+ Purchase",
+                    color: Colors.purple.shade700,
+                    icon: Icons.shopping_bag_rounded,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const PurchaseManagementScreen()));
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildActionButton(
+                    context: context,
+                    label: "Cash & Bank",
+                    color: Colors.blue.shade900,
+                    icon: Icons.account_balance_rounded,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const CashBankScreen()));
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildActionButton(
+                    context: context,
+                    label: "All Reports",
+                    color: Colors.indigo.shade900,
+                    icon: Icons.bar_chart_rounded,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsHubScreen()));
                     },
                   ),
                 ),

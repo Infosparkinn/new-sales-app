@@ -1,55 +1,95 @@
-# 📊 Vyapar Sales App - Modern GST Billing, Inventory & Accounting
+# 📊 Vyapar Sales App - Complete GST Billing, Inventory & Accounting Suite
 
-An offline-first, high-performance GST billing, inventory management, and business accounting application designed for Indian small & medium businesses (SMBs), retailers, wholesalers, and service providers. Inspired by Vyapar, built with Flutter and SQLite.
+An offline-first, high-performance GST billing, inventory management, and business accounting application designed for Indian small & medium businesses (SMBs), retailers, wholesalers, and distributors. Fully tailored to match Vyapar app workflows, built with Flutter and SQLite.
 
 Available on **Android** (Release APK) and **Windows Desktop** (Native x64 binary).
 
 ---
 
-## 🌟 Key Features
+## 🌟 Complete Feature Breakdown (Based on Vyapar Blueprint)
 
-### 🏢 Multi-Company & Firms Management
-- **Multiple Business Entities:** Create and manage separate firms (GSTIN, legal name, business address, bank account, IFSC, UPI ID, terms & conditions, and authorized signature).
-- **Instant Firm Switching:** Effortlessly switch between companies with isolated transactions, invoices, and accounting entries.
+### 🏢 1. Menu & Navigation Drawer
+- **Sale Module:** Sale Invoices, Payment In, Sale Return (Credit Note), Estimate / Quotation, Proforma Invoice, Sale Order, Delivery Challan, Mobile POS.
+- **Purchase Module:** Purchase Bills, Payment Out, Purchase Return (Debit Note), Purchase Orders.
+- **Expenses:** Preset categories for Manufacturing Expenses, Petrol, Rent, Salary, Tea, Transport, and Utilities with Input Tax Credit (ITC) eligibility.
+- **Cash and Bank:** Bank Accounts, Cash in Hand, Cash in GPay / UPI, Credit Card accounts, and inter-account fund transfers.
+- **My Online Store:** Digital product catalog with WhatsApp shareable links and UPI payment integration.
+- **Customer Loyalty Points:** Reward program with configurable earn rates (e.g. 1 pt per ₹100), redemption on bills, and customer points ledgers.
+- **Loans & Liabilities:** Business loans, EMIs, interest rates, and loan statement repayment logs.
+- **Sync Company:** Cross-device multi-company sync (integrated with **Sivan sports pro**).
+- **Backup & Restore:** Auto Backup, Backup to phone (.json), Backup to e-mail, and one-click database restore.
+- **Utilities:**
+  - Verify My Data (Database integrity & balance sheet reconciliation check)
+  - Open Calculator (Quick billing calculator with +5%, +12%, +18%, +28% GST buttons)
+  - Import Items (CSV / Excel format)
+  - Import from MyBillBook (MyBillBook migration parser)
+  - Bulk Update Tax Slab (Batch update GST rates across items)
+  - Export Items (CSV inventory export)
+  - Import Parties (CSV customers/suppliers import)
+  - Recycle Bin (Soft-delete & recovery for invoices and transactions)
+  - Close Financial Year (Roll forward closing balances to new FY)
+  - Messages (WhatsApp / SMS alert logs and customer broadcasts)
 
-### 🧾 Invoicing & Tax Engine
-- **GST Vector PDF Generation:** Generates print-ready invoices with dynamic UPI QR payment codes, bank account details, and item breakdowns.
-- **E-way Bills:** Record E-way Bill number, Transporter ID, Vehicle Number, and distance directly on bills and PDF receipts.
-- **TCS & TDS Deduction:** Configurable Tax Collected at Source (TCS) and Tax Deducted at Source (TDS) percentages applied to invoice totals.
-- **Real-Time Profit Margin:** Live calculation showing estimated profit and margin % while creating invoices before saving.
-- **Whitelabel Invoices:** Toggle `hideBranding` to remove software watermarks or advertisements on printouts.
+---
 
-### 📦 Inventory & Multi-Tier Pricing
-- **Tiered Pricing:** Define Retail, Wholesale, and Dealer prices for every product.
-- **Party-Specific Rates:** Set and remember custom negotiated rates for specific customers.
-- **Batch & Serial Tracking:** Track manufacturing dates, expiry dates, batch numbers, and serial numbers.
-- **Bulk Item & Stock Editor:** Spreadsheet-like screen to update prices, stock adjustments, and tax rates for hundreds of items at once.
-- **Custom Item Fields:** Add custom fields (e.g., IMEI, Color, Size, Rack Number, Warranty) to any inventory item.
+### 📑 2. Comprehensive 7-Category Reports Hub (40+ Reports)
 
-### 👥 Parties & Credit Controls
-- **Party Credit Limits:** Define maximum credit balances per party with real-time warning alerts during bill creation if limits are exceeded.
-- **Party Statement & Ledger:** Real-time receivables and payables tracking.
+#### Category 1: Financial & Transaction Reports
+- **Sale Report:** Detailed sales turnover and collections.
+- **Purchase Report:** Total vendor purchases and inward stock.
+- **Day Book:** Daily chronological receipts and payments journal.
+- **All Transactions:** Searchable ledger across all financial activities.
+- **Bill-wise Profit:** Profit and gross margin % for every invoice.
+- **Profit and Loss:** Revenue, Cost of Goods Sold (COGS), Operating expenses, and Net profit.
+- **Cash Flow:** Operating inflows, outflows, and net cash balance.
+- **Balance Sheet:** Real-time Assets (Current & Fixed) = Liabilities + Equity.
 
-### 🚜 Fixed Assets Register
-- **Asset Categories:** Track Plant & Machinery, Vehicles, IT Equipment, Furniture, and Real Estate.
-- **Depreciation Calculation:** Automatically calculate annual depreciation percentage and net book value for balance sheet integration.
+#### Category 2: Party Reports
+- **Party Statement (Ledger):** Customer/supplier chronological statement with running balance.
+- **Party-wise Profit & Loss:** Profit earned per customer account.
+- **All Parties Report:** Master receivables and payables summary.
+- **Party Report by Items:** Items bought or sold by each party.
+- **Sale / Purchase by Party:** Volume comparison per counterparty.
 
-### 🔔 Reminders & WhatsApp Connect
-- **WhatsApp Invoicing:** Send invoices with PDF download links and UPI payment requests directly to party WhatsApp numbers.
-- **Payment Reminders:** Automated reminder templates with pending balance, invoice reference, and due dates.
-- **Service Reminders:** Manage upcoming service deadlines (AMC, vehicle service, warranty, renewal) with automated status updates.
-- **Self & Update Notifications:** Send instant transaction confirmation and change alerts to business owner WhatsApp.
+#### Category 3: Item & Stock Reports
+- **Stock Summary Report:** Quantity on hand, purchase cost, sale value, expected profit.
+- **Item Report by Party:** Counterparty trade per SKU.
+- **Item-wise Profit & Loss:** Gross margin earned per item.
+- **Low Stock Summary Report:** Critical items below reorder threshold.
+- **Item Details Report:** Specifications, HSN, Tax slabs, barcodes, custom fields.
+- **Stock Detail Report:** Inward, outward, opening, and closing stock ledger.
+- **Sale / Purchase by Item Category:** Category-wise revenue performance.
+- **Stock Summary by Item Category:** Inventory valuation grouped by category.
+- **Item Batch Report:** Batches and expiry date schedules.
+- **Item Serial Report:** Serial numbers and warranty tracking.
+- **Item-wise Discount Report:** Discounts offered per product.
 
-### 🔄 Orders & Challan Conversion
-- Manage Quotations and Delivery Challans.
-- Convert approved Challans and Orders into final GST Sales Invoices in a single tap without re-entering items.
+#### Category 4: GST & Tax Reports
+- **GSTR-1:** Outward supplies categorized by B2B (with GSTIN), B2C, and HSN summary.
+- **GSTR-2:** Inward supplies and eligible Input Tax Credit (ITC).
+- **GSTR-3B:** Monthly tax return summary (Output Tax Liability - Eligible ITC = Net Payable).
+- **GST Transaction Report:** Itemized list of every taxable transaction with CGST/SGST/IGST breakdown.
+- **GSTR-9:** Annual consolidated summary.
+- **Sale Summary by HSN Code:** Taxable turnover and tax breakdown by HSN/SAC code.
+- **SAC Report:** Services Accounting Code summary.
 
-### 📑 Comprehensive Accounting & Reports
-- **Real-Time Balance Sheet:** Double-entry accounting tracking Assets (Current & Fixed), Liabilities, and Owner's Equity.
-- **Billwise Profit & Loss:** Inspect exact cost vs. selling price profits for each generated bill.
-- **Partywise Profit & Loss:** View profitability breakdowns for every customer and vendor.
-- **Item Batch & Expiry Report:** Track aging stock and expiring batches.
-- **Recycle Bin:** Soft-delete safeguard allowing easy recovery of deleted transactions, invoices, and items.
+#### Category 5: Expense Reports
+- **Expense Transaction Report:** Every recorded expense with payment mode and vendor GSTIN.
+- **Expense Category Report:** Categorized breakdown (Manufacturing, Petrol, Rent, Salary, Tea, Transport, Utilities).
+- **Expense Item Report:** Detailed itemized expense ledger.
+
+#### Category 6: Sale and Purchase Order Reports
+- **Sale / Purchase Order Transaction Report:** Status of Orders, Quotations, Proformas, Delivery Challans.
+- **Sale / Purchase Order Item Report:** Quantities and rates across pending and fulfilled orders.
+
+#### Category 7: Business Status & Taxes
+- **Bank Statement:** Ledger for each bank and UPI wallet account.
+- **Discount Report:** Total discounts given to customers.
+- **GST Report & GST Rate Report:** Sales categorized by 0%, 5%, 12%, 18%, 28% slabs.
+- **Form No. 27EQ:** Quarterly statement of Tax Collected at Source (TCS).
+- **TCS Receivable:** Summary of TCS credits.
+- **TDS Payable & TDS Receivable:** Summary of TDS deductions.
+- **Loan Statement Report:** Active loans, principal, EMI, interest payments schedule.
 
 ---
 
@@ -57,7 +97,7 @@ Available on **Android** (Release APK) and **Windows Desktop** (Native x64 binar
 
 - **Framework:** Flutter 3.24.0 (Channel stable)
 - **Programming Language:** Dart 3.5.0
-- **Database:** SQLite v2 with 13 tables (`sqflite` on Android, `sqflite_common_ffi` on Windows Desktop)
+- **Database:** SQLite v3 with 20 relational tables (`sqflite` on Android, `sqflite_common_ffi` on Windows Desktop)
 - **State Management:** Provider
 - **Document Generation:** `pdf` & `printing` with Vector Tax layout & dynamic QR codes
 - **Sharing & Communications:** `share_plus` with deep-linked WhatsApp intents

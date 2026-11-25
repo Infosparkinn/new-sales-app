@@ -11,6 +11,8 @@ import '../recycle_bin/recycle_bin_screen.dart';
 import '../items/bulk_item_update_screen.dart';
 import '../billing/orders_challans_screen.dart';
 import 'advanced_reports_screen.dart';
+import 'reports_hub_screen.dart';
+import '../../widgets/vyapar_drawer.dart';
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
@@ -33,6 +35,7 @@ class ReportsScreen extends StatelessWidget {
     final totalTax = totalCgst + totalSgst + totalIgst;
 
     return Scaffold(
+      drawer: const VyaparDrawer(),
       appBar: AppBar(
         title: const Text('Reports & Accounting Hub'),
         actions: [
@@ -50,6 +53,23 @@ class ReportsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 7-Category Comprehensive Reports Hub Link Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigo.shade800,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsHubScreen())),
+                icon: const Icon(Icons.menu_book_rounded),
+                label: const Text('EXPLORE 40+ REPORTS (7 CATEGORIES HUB)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              ),
+            ),
+            const SizedBox(height: 14),
+
             // Active Firm Card
             InkWell(
               onTap: () {

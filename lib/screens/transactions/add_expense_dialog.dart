@@ -24,13 +24,14 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   double _taxRate = 18.0;
 
   final List<String> _categories = [
+    'Manufacturing Expenses',
+    'Petrol',
+    'Rent',
+    'Salary',
+    'Tea',
+    'Transport',
     'Electricity / Utilities',
-    'Shop Rent',
-    'Tea & Refreshments',
-    'Transportation & Fuel',
-    'Staff Salary',
     'Packaging & Stationary',
-    'Maintenance & Repairs',
     'Marketing & Ads',
     'Other Expense',
   ];
@@ -66,8 +67,24 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: ['Tea', 'Petrol', 'Rent', 'Salary', 'Transport', 'Manufacturing Expenses'].map((c) {
+                      final isSelected = _category == c;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6, bottom: 8),
+                        child: ActionChip(
+                          label: Text(c, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.black87)),
+                          backgroundColor: isSelected ? Colors.orange.shade800 : Colors.grey.shade100,
+                          onPressed: () => setState(() => _category = c),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
                 DropdownButtonFormField<String>(
-                  value: _category,
+                  value: _categories.contains(_category) ? _category : _categories.first,
                   decoration: const InputDecoration(labelText: 'Expense Category *'),
                   items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                   onChanged: (val) => setState(() => _category = val ?? _category),

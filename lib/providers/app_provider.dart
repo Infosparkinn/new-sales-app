@@ -9,6 +9,9 @@ import '../models/item.dart';
 import '../models/party.dart';
 import '../models/invoice.dart';
 import '../models/transaction_record.dart';
+import '../models/cash_bank_account.dart';
+import '../models/loyalty_points.dart';
+import '../models/loan_account.dart';
 import '../services/database_service.dart';
 import '../services/share_service.dart';
 
@@ -27,6 +30,11 @@ class AppProvider extends ChangeNotifier {
   List<ServiceReminder> _reminders = [];
   List<OrderChallan> _ordersChallans = [];
   List<Account> _accounts = [];
+  List<CashBankAccount> _cashBankAccounts = [];
+  List<LoanAccount> _loans = [];
+  List<LoyaltyRecord> _loyaltyRecords = [];
+  Map<String, dynamic> _syncCompanyInfo = {};
+  List<Map<String, dynamic>> _messagesLog = [];
 
   bool _sendSelfNotification = false;
   bool _sendUpdateAlert = false;
@@ -58,6 +66,23 @@ class AppProvider extends ChangeNotifier {
   List<ServiceReminder> get reminders => _reminders;
   List<OrderChallan> get ordersChallans => _ordersChallans;
   List<Account> get accounts => _accounts;
+  List<CashBankAccount> get cashBankAccounts => _cashBankAccounts;
+  List<LoanAccount> get loans => _loans;
+  List<LoyaltyRecord> get loyaltyRecords => _loyaltyRecords;
+  Map<String, dynamic> get syncCompanyInfo => _syncCompanyInfo;
+  List<Map<String, dynamic>> get messagesLog => _messagesLog;
+
+  CashBankAccount get cashInHand => _cashBankAccounts.firstWhere(
+      (a) => a.accountType == 'cash',
+      orElse: () => CashBankAccount(id: 'c1', firmId: _activeFirm.id, name: 'Cash in Hand', accountType: 'cash', balance: 18500.0));
+
+  CashBankAccount get cashInGpay => _cashBankAccounts.firstWhere(
+      (a) => a.accountType == 'gpay',
+      orElse: () => CashBankAccount(id: 'g1', firmId: _activeFirm.id, name: 'Cash in GPay', accountType: 'gpay', balance: 12450.0));
+
+  List<CashBankAccount> get bankAccounts => _cashBankAccounts.where((a) => a.accountType == 'bank').toList();
+  List<CashBankAccount> get creditCards => _cashBankAccounts.where((a) => a.accountType == 'credit_card').toList();
+
   Map<String, double> get metrics => _metrics;
   bool get isLoading => _isLoading;
   bool get sendSelfNotification => _sendSelfNotification;
@@ -100,6 +125,11 @@ class AppProvider extends ChangeNotifier {
       _reminders = await _db.getReminders();
       _ordersChallans = await _db.getOrdersChallans();
       _accounts = await _db.getAccounts();
+      _cashBankAccounts = await _db.getCashBankAccounts();
+      _loans = await _db.getLoans();
+      _loyaltyRecords = await _db.getLoyaltyRecords();
+      _syncCompanyInfo = await _db.getSyncCompanyInfo();
+      _messagesLog = await _db.getMessagesLog();
       _metrics = await _db.getDashboardMetrics();
     } catch (e) {
       debugPrint('Error loading enterprise data: $e');
@@ -291,5 +321,106 @@ class AppProvider extends ChangeNotifier {
 
   Future<List<Map<String, dynamic>>> getItemBatchReport() async {
     return await _db.getItemBatchReport();
+  }
+
+  // ================= CASH & BANK OPERATIONS =================
+  Future<void> saveCashBankAccount(CashBankAccount acc) async {
+    await _db.saveCashBankAccount(acc);
+    _cashBankAccounts = await _db.getCashBankAccounts();
+    notifyListeners();
+  }
+
+  Future<void> deleteCashBankAccount(String id) async {
+    await _db.deleteCashBankAccount(id);
+    _cashBankAccounts = await _db.getCashBankAccounts();
+    notifyListeners();
+  }
+
+  Future<void> transferBankFunds(BankTransaction txn) async {
+    await _db.transferBankFunds(txn);
+    _cashBankAccounts = await _db.getCashBankAccounts();
+    notifyListeners();
+  }
+
+  Future<List<BankTransaction>> getBankTransactions() async {
+    return await _db.getBankTransactions();
+  }
+
+  // ================= LOYALTY POINTS =================
+  Future<int> getPartyLoyaltyPoints(String partyId) async {
+    return await _db.getPartyLoyaltyPoints(partyId);
+  }
+
+  Future<void> addLoyaltyRecord(LoyaltyRecord rec) async {
+    await _db.addLoyaltyRecord(rec);
+    _loyaltyRecords = await _db.getLoyaltyRecords();
+    notifyListeners();
+  }
+
+  // ================= LOANS & EMI =================
+  Future<void> saveLoan(LoanAccount loan) async {
+    await _db.saveLoan(loan);
+    _loans = await _db.getLoans();
+    notifyListeners();
+  }
+
+  Future<void> recordLoanPayment(LoanPayment payment) async {
+    await _db.recordLoanPayment(payment);
+    _loans = await _db.getLoans();
+    notifyListeners();
+  }
+
+  Future<List<LoanPayment>> getLoanPayments(String loanId) async {
+    return await _db.getLoanPayments(loanId);
+  }
+
+  // ================= SYNC COMPANY =================
+  Future<void> triggerCompanySync() async {
+    await _db.triggerCompanySync();
+    _syncCompanyInfo = await _db.getSyncCompanyInfo();
+    notifyListeners();
+  }
+
+  // ================= MESSAGES & BROADCAST =================
+  Future<void> logMessage({
+    required String phone,
+    required String name,
+    required String message,
+    String channel = 'WhatsApp',
+  }) async {
+    await _db.logMessage(
+      recipientPhone: phone,
+      recipientName: name,
+      messageContent: message,
+      channel: channel,
+    );
+    _messagesLog = await _db.getMessagesLog();
+    notifyListeners();
+  }
+
+  // ================= UTILITIES & INTEGRITY =================
+  Future<Map<String, dynamic>> verifyDataIntegrity() async {
+    return await _db.verifyDataIntegrity();
+  }
+
+  Future<void> bulkUpdateTaxSlabs(List<String> itemIds, double newTaxRate) async {
+    await _db.bulkUpdateTaxSlabs(itemIds, newTaxRate);
+    _items = await _db.getItems();
+    notifyListeners();
+  }
+
+  Future<void> closeFinancialYear(String newYearLabel) async {
+    await _db.closeFinancialYear(newYearLabel);
+    await loadAllData();
+  }
+
+  // ================= BACKUP & RESTORE =================
+  Future<String> exportBackupJson() async {
+    return await _db.exportBackupJson();
+  }
+
+  Future<void> restoreBackupJson(String jsonStr) async {
+    await _db.restoreBackupJson(jsonStr);
+    await loadAllData();
   }
 }
