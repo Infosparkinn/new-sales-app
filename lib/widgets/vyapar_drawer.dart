@@ -21,6 +21,8 @@ import '../screens/utilities/calculator_dialog.dart';
 import '../screens/recycle_bin/recycle_bin_screen.dart';
 import '../screens/reports/reports_hub_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/auth/login_screen.dart';
+import '../screens/auth/device_management_screen.dart';
 
 class VyaparDrawer extends StatelessWidget {
   const VyaparDrawer({super.key});
@@ -108,6 +110,70 @@ class VyaparDrawer extends StatelessWidget {
                             ),
                           ),
                           const Icon(Icons.chevron_right, color: Colors.white70, size: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Logged In User Profile Pill
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LoginScreen(isSwitchingUser: true),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white30),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            provider.currentUser?.isDesktop == true
+                                ? Icons.desktop_windows
+                                : Icons.phone_android,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              provider.currentUser != null
+                                  ? 'User: ${provider.currentUser!.name}'
+                                  : 'Select Device Profile',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              provider.currentUser?.deviceSlot.toUpperCase().replaceAll('_', ' ') ?? 'LOGIN',
+                              style: const TextStyle(
+                                color: AppTheme.primary,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -332,6 +398,30 @@ class VyaparDrawer extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const RecycleBinScreen()));
+                    },
+                  ),
+
+                  // 12. MULTI-DEVICE LOGINS (1 Desktop + 3 Mobile)
+                  _buildSectionHeader('MULTI-DEVICE ACCESS'),
+                  _drawerItem(
+                    icon: Icons.switch_account_rounded,
+                    title: 'Switch Profile / Login',
+                    subtitle: '1 Desktop Admin + 3 Mobile Android Logins',
+                    color: const Color(0xFFC62828),
+                    trailingBadge: '4 USERS',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen(isSwitchingUser: true)));
+                    },
+                  ),
+                  _drawerItem(
+                    icon: Icons.devices_other_rounded,
+                    title: 'Device & Session Manager',
+                    subtitle: '4 of 4 active licensed terminals',
+                    color: const Color(0xFF1565C0),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const DeviceManagementScreen()));
                     },
                   ),
 

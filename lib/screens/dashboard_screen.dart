@@ -16,6 +16,8 @@ import 'billing/mobile_pos_screen.dart';
 import 'purchase/purchase_management_screen.dart';
 import 'cash_bank/cash_bank_screen.dart';
 import 'reports/reports_hub_screen.dart';
+import 'auth/login_screen.dart';
+import 'auth/device_management_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final VoidCallback onNavigateToParties;
@@ -60,6 +62,62 @@ class DashboardScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          // Multi-Device Profile Pill
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LoginScreen(isSwitchingUser: true),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white38),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    provider.currentUser?.isDesktop == true
+                        ? Icons.desktop_windows
+                        : Icons.phone_android,
+                    size: 15,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    provider.currentUser != null
+                        ? provider.currentUser!.name.split(' ').first
+                        : 'Login',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.devices_other),
+            tooltip: 'Connected Terminals (4 Devices)',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const DeviceManagementScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh Data',

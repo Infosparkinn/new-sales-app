@@ -19,6 +19,7 @@ import '../models/transaction_record.dart';
 import '../models/cash_bank_account.dart';
 import '../models/loyalty_points.dart';
 import '../models/loan_account.dart';
+import '../models/app_user.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
@@ -541,6 +542,161 @@ class DatabaseService {
         'invoiceId': 'INV-002',
         'date': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
         'notes': 'Points earned from bill INV-002',
+      });
+    }
+
+    // 21. Multi-Device App Users (1 Desktop Login + 3 Mobile Android Logins)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS app_users (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        phone TEXT,
+        role TEXT NOT NULL,
+        deviceType TEXT NOT NULL,
+        deviceSlot TEXT NOT NULL,
+        pin TEXT NOT NULL,
+        isActive INTEGER,
+        lastLoginAt TEXT,
+        canViewReports INTEGER,
+        canEditPrices INTEGER,
+        canDeleteBills INTEGER,
+        canViewProfits INTEGER
+      )
+    ''');
+
+    // 22. Active Device Sessions Table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS device_sessions (
+        id TEXT PRIMARY KEY,
+        userId TEXT NOT NULL,
+        userName TEXT NOT NULL,
+        deviceType TEXT NOT NULL,
+        deviceName TEXT NOT NULL,
+        deviceSlot TEXT NOT NULL,
+        ipAddress TEXT,
+        isOnline INTEGER,
+        lastActive TEXT
+      )
+    ''');
+
+    // Seed 1 Desktop Login + 3 Mobile Android Logins if empty
+    final existingUsers = await db.query('app_users');
+    if (existingUsers.isEmpty) {
+      // 1 Desktop Login (Primary Admin / Owner / Counter Terminal)
+      await db.insert('app_users', {
+        'id': 'user_desktop_admin',
+        'name': 'Desktop Admin (Master Counter)',
+        'phone': '9876543210',
+        'role': 'admin',
+        'deviceType': 'desktop',
+        'deviceSlot': 'desktop_1',
+        'pin': '1234',
+        'isActive': 1,
+        'lastLoginAt': DateTime.now().toIso8601String(),
+        'canViewReports': 1,
+        'canEditPrices': 1,
+        'canDeleteBills': 1,
+        'canViewProfits': 1,
+      });
+
+      // Mobile Android Login 1 (Sales Representative)
+      await db.insert('app_users', {
+        'id': 'user_mobile_sales_1',
+        'name': 'Mobile User 1 (Sales Executive)',
+        'phone': '9840112233',
+        'role': 'salesman',
+        'deviceType': 'android',
+        'deviceSlot': 'mobile_1',
+        'pin': '1234',
+        'isActive': 1,
+        'lastLoginAt': DateTime.now().subtract(const Duration(minutes: 15)).toIso8601String(),
+        'canViewReports': 1,
+        'canEditPrices': 1,
+        'canDeleteBills': 0,
+        'canViewProfits': 1,
+      });
+
+      // Mobile Android Login 2 (Delivery & Field Agent)
+      await db.insert('app_users', {
+        'id': 'user_mobile_delivery_2',
+        'name': 'Mobile User 2 (Delivery & Field Agent)',
+        'phone': '9840223344',
+        'role': 'delivery',
+        'deviceType': 'android',
+        'deviceSlot': 'mobile_2',
+        'pin': '1234',
+        'isActive': 1,
+        'lastLoginAt': DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(),
+        'canViewReports': 0,
+        'canEditPrices': 0,
+        'canDeleteBills': 0,
+        'canViewProfits': 0,
+      });
+
+      // Mobile Android Login 3 (Billing Counter Assistant)
+      await db.insert('app_users', {
+        'id': 'user_mobile_counter_3',
+        'name': 'Mobile User 3 (Billing Assistant)',
+        'phone': '9840334455',
+        'role': 'billing_assistant',
+        'deviceType': 'android',
+        'deviceSlot': 'mobile_3',
+        'pin': '1234',
+        'isActive': 1,
+        'lastLoginAt': DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
+        'canViewReports': 1,
+        'canEditPrices': 0,
+        'canDeleteBills': 0,
+        'canViewProfits': 0,
+      });
+    }
+
+    // Seed Device Sessions if empty
+    final existingSessions = await db.query('device_sessions');
+    if (existingSessions.isEmpty) {
+      await db.insert('device_sessions', {
+        'id': 'session_desktop_1',
+        'userId': 'user_desktop_admin',
+        'userName': 'Desktop Admin (Master Counter)',
+        'deviceType': 'desktop',
+        'deviceName': 'Windows 11 POS Terminal #1',
+        'deviceSlot': 'desktop_1',
+        'ipAddress': '192.168.1.100',
+        'isOnline': 1,
+        'lastActive': DateTime.now().toIso8601String(),
+      });
+      await db.insert('device_sessions', {
+        'id': 'session_mobile_1',
+        'userId': 'user_mobile_sales_1',
+        'userName': 'Mobile User 1 (Sales Executive)',
+        'deviceType': 'android',
+        'deviceName': 'Samsung Galaxy S23 (Android 14)',
+        'deviceSlot': 'mobile_1',
+        'ipAddress': '192.168.1.105',
+        'isOnline': 1,
+        'lastActive': DateTime.now().toIso8601String(),
+      });
+      await db.insert('device_sessions', {
+        'id': 'session_mobile_2',
+        'userId': 'user_mobile_delivery_2',
+        'userName': 'Mobile User 2 (Delivery & Field Agent)',
+        'deviceType': 'android',
+        'deviceName': 'Xiaomi Redmi Note 13 (Android 14)',
+        'deviceSlot': 'mobile_2',
+        'ipAddress': '192.168.1.108',
+        'isOnline': 1,
+        'lastActive': DateTime.now().toIso8601String(),
+      });
+      await db.insert('device_sessions', {
+        'id': 'session_mobile_3',
+        'userId': 'user_mobile_counter_3',
+        'userName': 'Mobile User 3 (Billing Assistant)',
+        'deviceType': 'android',
+        'deviceName': 'OnePlus Nord CE (Android 14)',
+        'deviceSlot': 'mobile_3',
+        'ipAddress': '192.168.1.112',
+        'isOnline': 1,
+        'lastActive': DateTime.now().toIso8601String(),
       });
     }
   }
@@ -1922,5 +2078,109 @@ class DatabaseService {
   Future<List<Item>> getLowStockReport() async {
     final items = await getItems();
     return items.where((it) => it.stockQuantity <= it.minStockAlert).toList();
+  }
+
+  // ==========================================
+  // 17. MULTI-DEVICE AUTH & USERS (1 Desktop + 3 Mobile Android)
+  // ==========================================
+
+  Future<List<AppUser>> getAppUsers() async {
+    final db = await database;
+    final maps = await db.query('app_users', orderBy: 'deviceSlot ASC');
+    return maps.map((m) => AppUser.fromMap(m)).toList();
+  }
+
+  Future<AppUser?> getAppUserBySlot(String slot) async {
+    final db = await database;
+    final maps = await db.query(
+      'app_users',
+      where: 'deviceSlot = ?',
+      whereArgs: [slot],
+      limit: 1,
+    );
+    if (maps.isEmpty) return null;
+    return AppUser.fromMap(maps.first);
+  }
+
+  Future<AppUser?> authenticateUser(String slot, String pin) async {
+    final db = await database;
+    final maps = await db.query(
+      'app_users',
+      where: 'deviceSlot = ? AND pin = ? AND isActive = 1',
+      whereArgs: [slot, pin],
+      limit: 1,
+    );
+    if (maps.isEmpty) return null;
+    final user = AppUser.fromMap(maps.first);
+    // Update last login timestamp
+    await setAppUserLastLogin(user.id);
+    return user;
+  }
+
+  Future<void> updateAppUser(AppUser user) async {
+    final db = await database;
+    await db.update(
+      'app_users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  Future<void> updateAppUserPin(String userId, String newPin) async {
+    final db = await database;
+    await db.update(
+      'app_users',
+      {'pin': newPin},
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<void> setAppUserLastLogin(String userId) async {
+    final db = await database;
+    final now = DateTime.now().toIso8601String();
+    await db.update(
+      'app_users',
+      {'lastLoginAt': now},
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+    // Also update matching session lastActive
+    await db.update(
+      'device_sessions',
+      {'lastActive': now, 'isOnline': 1},
+      where: 'userId = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<List<DeviceSession>> getDeviceSessions() async {
+    final db = await database;
+    final maps = await db.query('device_sessions', orderBy: 'deviceSlot ASC');
+    return maps.map((m) => DeviceSession.fromMap(m)).toList();
+  }
+
+  Future<void> updateDeviceSession(DeviceSession session) async {
+    final db = await database;
+    await db.update(
+      'device_sessions',
+      session.toMap(),
+      where: 'id = ?',
+      whereArgs: [session.id],
+    );
+  }
+
+  Future<void> updateDeviceSessionStatus(String sessionId, bool isOnline) async {
+    final db = await database;
+    await db.update(
+      'device_sessions',
+      {
+        'isOnline': isOnline ? 1 : 0,
+        'lastActive': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [sessionId],
+    );
   }
 }

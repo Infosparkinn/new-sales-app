@@ -104,6 +104,25 @@ Available on **Android** (Release APK) and **Windows Desktop** (Native x64 binar
 
 ---
 
+## 🔐 Multi-Device Login Architecture (1 Desktop + 3 Mobile Android Logins)
+
+The application implements enterprise multi-device licensing and role-based access control (RBAC), supporting **exactly 1 Desktop Master POS login** and **3 Mobile Android field terminals**:
+
+| Slot | Profile Name | Device Type | Role | Default PIN | Permissions |
+|---|---|---|---|---|---|
+| **desktop_1** | **Desktop Admin (Master Counter)** | 🖥️ Windows Desktop | Admin | `1234` | Full access: View Reports, Edit Rates, Delete Bills, View Profit, System Config |
+| **mobile_1** | **Mobile User 1 (Sales Executive)** | 📱 Android Mobile | Salesman | `1234` | View Reports, Edit Rates, View Profit, Fast Billing |
+| **mobile_2** | **Mobile User 2 (Delivery & Field Agent)** | 📱 Android Mobile | Delivery | `1234` | Bill Collections, Delivery Confirmation, Order Tracking |
+| **mobile_3** | **Mobile User 3 (Billing Assistant)** | 📱 Android Mobile | Assistant | `1234` | Invoicing, View Reports, Customer Search |
+
+### Key Multi-Device Capabilities:
+- **PIN Authentication & Quick Login:** 4-digit numeric keypad with instant authentication or 1-tap quick login for fast counter operations.
+- **Auto-Detection:** Automatically pre-selects the Desktop Admin profile on Windows x64 and mobile profiles on Android handsets.
+- **Device & Session Manager:** Real-time visibility into all 4 connected terminals, IP addresses, online/offline status, and PIN reset utility.
+- **License Enforcement:** Real-time allocation pill indicating 4/4 active device licenses synchronized with the central company (`Sivan sports pro`).
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites

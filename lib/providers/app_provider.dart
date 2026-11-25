@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform;
 import '../models/business_profile.dart';
 import '../models/firm.dart';
 import '../models/fixed_asset.dart';
@@ -12,6 +13,7 @@ import '../models/transaction_record.dart';
 import '../models/cash_bank_account.dart';
 import '../models/loyalty_points.dart';
 import '../models/loan_account.dart';
+import '../models/app_user.dart';
 import '../services/database_service.dart';
 import '../services/share_service.dart';
 
@@ -36,6 +38,11 @@ class AppProvider extends ChangeNotifier {
   Map<String, dynamic> _syncCompanyInfo = {};
   List<Map<String, dynamic>> _messagesLog = [];
 
+  // Multi-Device Users & Sessions (1 Desktop + 3 Mobile Android)
+  List<AppUser> _appUsers = [];
+  AppUser? _currentUser;
+  List<DeviceSession> _deviceSessions = [];
+
   bool _sendSelfNotification = false;
   bool _sendUpdateAlert = false;
   bool _hideBranding = false;
@@ -56,6 +63,27 @@ class AppProvider extends ChangeNotifier {
   List<Party> get parties => _parties;
   List<Party> get customers => _parties.where((p) => p.isCustomer).toList();
   List<Party> get suppliers => _parties.where((p) => p.isSupplier).toList();
+
+  // Multi-Device Auth Getters
+  List<AppUser> get appUsers => _appUsers;
+  AppUser? get currentUser => _currentUser;
+  List<DeviceSession> get deviceSessions => _deviceSessions;
+  AppUser? get desktopUser => _appUsers.firstWhere(
+        (u) => u.deviceSlot == 'desktop_1',
+        orElse: () => _appUsers.isNotEmpty ? _appUsers.first : AppUser(
+          id: 'user_desktop_admin',
+          name: 'Desktop Admin (Master Counter)',
+          phone: '9876543210',
+          role: 'admin',
+          deviceType: 'desktop',
+          deviceSlot: 'desktop_1',
+        ),
+      );
+  List<AppUser> get mobileUsers =>
+      _appUsers.where((u) => u.deviceType == 'android').toList();
+  int get activeDeviceCount => _deviceSessions.where((s) => s.isOnline).length;
+  int get totalDeviceLicenses => 4; // 1 Desktop + 3 Mobile Android logins
+  bool get isAuthenticated => _currentUser != null;
   List<Item> get items => _items;
   List<Item> get lowStockItems => _items.where((i) => i.isLowStock).toList();
   List<Invoice> get invoices => _invoices;
@@ -131,12 +159,94 @@ class AppProvider extends ChangeNotifier {
       _syncCompanyInfo = await _db.getSyncCompanyInfo();
       _messagesLog = await _db.getMessagesLog();
       _metrics = await _db.getDashboardMetrics();
+
+      // Multi-Device Logins
+      _appUsers = await _db.getAppUsers();
+      _deviceSessions = await _db.getDeviceSessions();
+
+      if (_currentUser == null && _appUsers.isNotEmpty) {
+        if (!kIsWeb && Platform.isWindows) {
+          // Default to 1 Desktop Login on Windows Desktop
+          _currentUser = _appUsers.firstWhere(
+            (u) => u.deviceType == 'desktop',
+            orElse: () => _appUsers.first,
+          );
+        } else {
+          // Default to Mobile Login on Android/Mobile
+          _currentUser = _appUsers.firstWhere(
+            (u) => u.deviceType == 'android',
+            orElse: () => _appUsers.first,
+          );
+        }
+      }
     } catch (e) {
       debugPrint('Error loading enterprise data: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  // ================= MULTI-DEVICE AUTHENTICATION =================
+
+  Future<bool> loginUser(String slot, String pin) async {
+    final user = await _db.authenticateUser(slot, pin);
+    if (user != null) {
+      _currentUser = user;
+      _appUsers = await _db.getAppUsers();
+      _deviceSessions = await _db.getDeviceSessions();
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> switchUser(AppUser user) async {
+    _currentUser = user;
+    await _db.setAppUserLastLogin(user.id);
+    _appUsers = await _db.getAppUsers();
+    _deviceSessions = await _db.getDeviceSessions();
+    notifyListeners();
+  }
+
+  Future<void> logoutUser() async {
+    if (_currentUser != null) {
+      // Find matching session and set offline
+      final session = _deviceSessions.firstWhere(
+        (s) => s.userId == _currentUser!.id,
+        orElse: () => _deviceSessions.first,
+      );
+      await _db.updateDeviceSessionStatus(session.id, false);
+    }
+    _currentUser = null;
+    _deviceSessions = await _db.getDeviceSessions();
+    notifyListeners();
+  }
+
+  Future<bool> updatePin(String userId, String oldPin, String newPin) async {
+    final user = _appUsers.firstWhere((u) => u.id == userId);
+    if (user.pin != oldPin) {
+      return false;
+    }
+    await _db.updateAppUserPin(userId, newPin);
+    _appUsers = await _db.getAppUsers();
+    if (_currentUser?.id == userId) {
+      _currentUser = _currentUser!.copyWith(pin: newPin);
+    }
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> toggleDeviceSession(String sessionId, bool isOnline) async {
+    await _db.updateDeviceSessionStatus(sessionId, isOnline);
+    _deviceSessions = await _db.getDeviceSessions();
+    notifyListeners();
+  }
+
+  Future<void> refreshUsersAndSessions() async {
+    _appUsers = await _db.getAppUsers();
+    _deviceSessions = await _db.getDeviceSessions();
+    notifyListeners();
   }
 
   // ================= MULTI-FIRM SWITCHING =================
