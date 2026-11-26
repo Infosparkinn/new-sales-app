@@ -1195,7 +1195,7 @@ class DatabaseService {
 
       // 2. Insert Invoice Items & Deduct Stock
       for (var item in invoice.items) {
-        await txn.insert('invoice_items', item.toMap());
+        await txn.insert('invoice_items', item.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
         await txn.rawUpdate('''
           UPDATE items 
           SET stockQuantity = stockQuantity - ? 
@@ -1228,12 +1228,11 @@ class DatabaseService {
       await txn.insert('transactions', txnRecord.toMap());
 
       // 5. Increment Next Invoice Number
-      final firm = await getActiveFirm();
       await txn.rawUpdate('''
         UPDATE firms 
         SET nextInvoiceNumber = nextInvoiceNumber + 1 
         WHERE id = ?
-      ''', [firm.id]);
+      ''', [_activeFirmId]);
     });
   }
 
