@@ -119,28 +119,44 @@ class _AddPaymentInDialogState extends State<AddPaymentInDialog> {
           style: ElevatedButton.styleFrom(backgroundColor: AppTheme.successGreen),
           onPressed: () async {
             if (_formKey.currentState?.validate() != true) return;
-            final amount = double.parse(_amountController.text);
-            final party = _selectedParty ?? customers.first;
+            final amount = double.tryParse(_amountController.text) ?? 0.0;
+            if (amount <= 0) return;
+            final party = _selectedParty ?? (customers.isNotEmpty ? customers.first : Party(id: 'walk_in', name: 'Walk-in Customer'));
 
-            final txn = TransactionRecord(
-              id: const Uuid().v4(),
-              date: DateTime.now(),
-              type: 'payment_in',
-              partyId: party.id,
-              partyName: party.name,
-              amount: amount,
-              paymentMode: _paymentMode,
-              description: _descController.text.trim().isNotEmpty
-                  ? _descController.text.trim()
-                  : 'Payment received from ${party.name}',
-            );
-
-            await provider.addTransaction(txn);
-            if (context.mounted) {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Received ${AppTheme.currency.format(amount)} from ${party.name}!')),
+            try {
+              final txn = TransactionRecord(
+                id: const Uuid().v4(),
+                firmId: provider.activeFirm.id.isNotEmpty ? provider.activeFirm.id : 'default_firm',
+                date: DateTime.now(),
+                type: 'payment_in',
+                partyId: party.id,
+                partyName: party.name,
+                amount: amount,
+                paymentMode: _paymentMode,
+                description: _descController.text.trim().isNotEmpty
+                    ? _descController.text.trim()
+                    : 'Payment received from ${party.name}',
               );
+
+              await provider.addTransaction(txn);
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppTheme.successGreen,
+                    content: Text('Received ${AppTheme.currency.format(amount)} from ${party.name}!'),
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppTheme.dangerRed,
+                    content: Text('Failed to record payment: $e'),
+                  ),
+                );
+              }
             }
           },
           child: const Text('Record Payment'),

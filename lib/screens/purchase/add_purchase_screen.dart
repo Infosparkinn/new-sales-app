@@ -357,51 +357,66 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
 
   Future<void> _savePurchase(BuildContext context, AppProvider provider, double grandTotal, double grandTax) async {
     final supplier = _selectedSupplier!;
-    final billNo = _billNumberController.text.trim();
+    final billNo = _billNumberController.text.trim().isNotEmpty ? _billNumberController.text.trim() : 'PUR-${DateTime.now().millisecondsSinceEpoch}';
 
-    // 1. Update stock quantities for each purchased item
-    for (var line in _lines) {
-      final existingItem = provider.items.firstWhere((i) => i.id == line.itemId);
-      final updatedItem = existingItem.copyWith(
-        stockQuantity: existingItem.stockQuantity + line.quantity,
-        purchasePrice: line.purchaseRate,
+    try {
+      // 1. Update stock quantities for each purchased item
+      for (var line in _lines) {
+        final existingItem = provider.items.firstWhere((i) => i.id == line.itemId);
+        final updatedItem = existingItem.copyWith(
+          stockQuantity: existingItem.stockQuantity + line.quantity,
+          purchasePrice: line.purchaseRate,
+        );
+        await provider.saveItem(updatedItem);
+      }
+
+      // 2. Update supplier balance (if credit, increase payable)
+      if (_paymentMode == 'credit') {
+        final updatedSupplier = supplier.copyWith(
+          currentBalance: supplier.currentBalance - grandTotal,
+        );
+        await provider.saveParty(updatedSupplier);
+      }
+
+      // 3. Record purchase transaction
+      final txn = TransactionRecord(
+        id: _uuid.v4(),
+        firmId: provider.activeFirm.id.isNotEmpty ? provider.activeFirm.id : 'default_firm',
+        date: DateTime.now(),
+        type: 'purchase',
+        partyId: supplier.id,
+        partyName: supplier.name,
+        amount: grandTotal,
+        paymentMode: _paymentMode,
+        referenceId: billNo,
+        description: 'Inward Purchase Bill from ${supplier.name}',
+        isItcEligible: _isItcEligible,
+        gstin: supplier.gstin,
+        taxRate: _lines.isNotEmpty ? _lines.first.taxRate : 0.0,
+        cgstAmount: grandTax / 2,
+        sgstAmount: grandTax / 2,
       );
-      await provider.saveItem(updatedItem);
-    }
+      await provider.addTransaction(txn);
 
-    // 2. Update supplier balance (if credit, increase payable)
-    if (_paymentMode == 'credit') {
-      final updatedSupplier = supplier.copyWith(
-        currentBalance: supplier.currentBalance - grandTotal,
-      );
-      await provider.saveParty(updatedSupplier);
-    }
-
-    // 3. Record purchase transaction
-    final txn = TransactionRecord(
-      id: _uuid.v4(),
-      firmId: provider.activeFirm.id,
-      date: DateTime.now(),
-      type: 'purchase',
-      partyId: supplier.id,
-      partyName: supplier.name,
-      amount: grandTotal,
-      paymentMode: _paymentMode,
-      referenceId: billNo,
-      description: 'Inward Purchase Bill from ${supplier.name}',
-      isItcEligible: _isItcEligible,
-      gstin: supplier.gstin,
-      taxRate: _lines.isNotEmpty ? _lines.first.taxRate : 0.0,
-      cgstAmount: grandTax / 2,
-      sgstAmount: grandTax / 2,
-    );
-    await provider.addTransaction(txn);
-
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Purchase Bill $billNo saved! Stock updated for ${_lines.length} items.')),
-      );
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppTheme.successGreen,
+            content: Text('Purchase Bill $billNo saved! Stock updated for ${_lines.length} items.'),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error saving purchase bill: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppTheme.dangerRed,
+            content: Text('Failed to save purchase bill: $e'),
+          ),
+        );
+      }
     }
   }
 }

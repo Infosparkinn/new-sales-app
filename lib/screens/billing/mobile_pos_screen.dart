@@ -251,54 +251,61 @@ class _MobilePosScreenState extends State<MobilePosScreen> {
   }
 
   Future<void> _checkoutPosBill(BuildContext context, AppProvider provider, double grandTotal, double subtotal, double tax) async {
-    final invNum = await provider.getNextInvoiceNumber();
-    final defaultParty = provider.customers.isNotEmpty ? provider.customers.first : Party(id: 'walk_in', name: 'Walk-in Retail Customer', partyType: 'customer');
+    try {
+      final invNum = await provider.getNextInvoiceNumber();
+      final defaultParty = provider.customers.isNotEmpty ? provider.customers.first : Party(id: 'walk_in', name: 'Walk-in Retail Customer', partyType: 'customer');
 
-    final invoiceItems = <InvoiceItem>[];
-    _cart.forEach((itemId, qty) {
-      final it = provider.items.firstWhere((i) => i.id == itemId, orElse: () => provider.items.first);
-      invoiceItems.add(InvoiceItem(
+      final invoiceItems = <InvoiceItem>[];
+      _cart.forEach((itemId, qty) {
+        final it = provider.items.firstWhere((i) => i.id == itemId, orElse: () => provider.items.first);
+        invoiceItems.add(InvoiceItem(
+          id: _uuid.v4(),
+          invoiceId: '',
+          itemId: it.id,
+          itemName: it.name,
+          quantity: qty.toDouble(),
+          unit: it.unit,
+          unitPrice: it.salePrice,
+          purchasePrice: it.purchasePrice,
+          taxRate: it.taxRate,
+          cgstAmount: (it.salePrice * qty * (it.taxRate / 200)),
+          sgstAmount: (it.salePrice * qty * (it.taxRate / 200)),
+          totalAmount: (it.salePrice * qty) * (1 + it.taxRate / 100),
+        ));
+      });
+
+      final invoice = Invoice(
         id: _uuid.v4(),
-        invoiceId: '',
-        itemId: it.id,
-        itemName: it.name,
-        quantity: qty.toDouble(),
-        unit: it.unit,
-        unitPrice: it.salePrice,
-        purchasePrice: it.purchasePrice,
-        taxRate: it.taxRate,
-        cgstAmount: (it.salePrice * qty * (it.taxRate / 200)),
-        sgstAmount: (it.salePrice * qty * (it.taxRate / 200)),
-        totalAmount: (it.salePrice * qty) * (1 + it.taxRate / 100),
-      ));
-    });
+        firmId: provider.activeFirm.id.isNotEmpty ? provider.activeFirm.id : 'default_firm',
+        invoiceNumber: invNum.isNotEmpty ? invNum : 'INV-001',
+        partyId: defaultParty.id,
+        partyName: defaultParty.name,
+        partyPhone: defaultParty.phone,
+        invoiceDate: DateTime.now(),
+        paymentMode: _selectedPaymentMode,
+        subtotal: subtotal,
+        cgstAmount: tax / 2,
+        sgstAmount: tax / 2,
+        totalAmount: grandTotal,
+        receivedAmount: grandTotal,
+        balanceAmount: 0.0,
+        status: 'paid',
+        notes: 'Quick POS Counter Sale',
+        items: invoiceItems,
+      );
 
-    final invoice = Invoice(
-      id: _uuid.v4(),
-      firmId: provider.activeFirm.id,
-      invoiceNumber: invNum,
-      partyId: defaultParty.id,
-      partyName: defaultParty.name,
-      partyPhone: defaultParty.phone,
-      invoiceDate: DateTime.now(),
-      paymentMode: _selectedPaymentMode,
-      subtotal: subtotal,
-      cgstAmount: tax / 2,
-      sgstAmount: tax / 2,
-      totalAmount: grandTotal,
-      receivedAmount: grandTotal,
-      balanceAmount: 0.0,
-      status: 'paid',
-      notes: 'Quick POS Counter Sale',
-      items: invoiceItems,
-    );
+      await provider.createInvoice(invoice);
+      setState(() => _cart.clear());
 
-    await provider.createInvoice(invoice);
-    setState(() => _cart.clear());
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('POS Invoice $invNum Generated Successfully!')));
-      Navigator.push(context, MaterialPageRoute(builder: (_) => InvoicePreviewScreen(invoice: invoice)));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('POS Invoice $invNum Generated Successfully!')));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => InvoicePreviewScreen(invoice: invoice)));
+      }
+    } catch (e) {
+      debugPrint('Error in POS checkout: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('POS Checkout Failed: $e'), backgroundColor: AppTheme.dangerRed));
+      }
     }
   }
 }

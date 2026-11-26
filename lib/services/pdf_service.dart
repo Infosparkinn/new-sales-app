@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -282,11 +283,17 @@ class PdfService {
     return pdf.save();
   }
 
-  static Future<File> savePdfToFile(Uint8List bytes, String filename) async {
-    final output = await getTemporaryDirectory();
-    final file = File('${output.path}/$filename');
-    await file.writeAsBytes(bytes);
-    return file;
+  static Future<File?> savePdfToFile(Uint8List bytes, String filename) async {
+    if (kIsWeb) return null;
+    try {
+      final output = await getTemporaryDirectory();
+      final file = File('${output.path}/$filename');
+      await file.writeAsBytes(bytes);
+      return file;
+    } catch (e) {
+      debugPrint('savePdfToFile error: $e');
+      return null;
+    }
   }
 
   static pw.Widget _tableHeader(String text) {

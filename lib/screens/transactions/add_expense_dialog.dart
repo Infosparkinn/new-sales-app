@@ -185,30 +185,44 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               sgst = taxPart / 2.0;
             }
 
-            final txn = TransactionRecord(
-              id: const Uuid().v4(),
-              firmId: provider.activeFirm.id,
-              date: DateTime.now(),
-              type: 'expense',
-              partyName: _category,
-              amount: amount,
-              paymentMode: _paymentMode,
-              description: _descController.text.trim().isNotEmpty
-                  ? _descController.text.trim()
-                  : 'Expense: $_category',
-              isItcEligible: _isItcEligible,
-              gstin: _gstinController.text.trim().toUpperCase(),
-              taxRate: _taxRate,
-              cgstAmount: cgst,
-              sgstAmount: sgst,
-            );
-
-            await provider.addTransaction(txn);
-            if (context.mounted) {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Expense of ${AppTheme.currency.format(amount)} recorded${_isItcEligible ? " with ITC!" : "!"}')),
+            try {
+              final txn = TransactionRecord(
+                id: const Uuid().v4(),
+                firmId: provider.activeFirm.id.isNotEmpty ? provider.activeFirm.id : 'default_firm',
+                date: DateTime.now(),
+                type: 'expense',
+                partyName: _category,
+                amount: amount,
+                paymentMode: _paymentMode,
+                description: _descController.text.trim().isNotEmpty
+                    ? _descController.text.trim()
+                    : 'Expense: $_category',
+                isItcEligible: _isItcEligible,
+                gstin: _gstinController.text.trim().toUpperCase(),
+                taxRate: _taxRate,
+                cgstAmount: cgst,
+                sgstAmount: sgst,
               );
+
+              await provider.addTransaction(txn);
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppTheme.successGreen,
+                    content: Text('Expense of ${AppTheme.currency.format(amount)} recorded${_isItcEligible ? " with ITC!" : "!"}'),
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppTheme.dangerRed,
+                    content: Text('Failed to save expense: $e'),
+                  ),
+                );
+              }
             }
           },
           child: const Text('Save Expense'),

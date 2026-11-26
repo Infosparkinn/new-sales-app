@@ -101,29 +101,41 @@ class _AddPaymentOutDialogState extends State<AddPaymentOutDialog> {
               return;
             }
 
-            final txn = TransactionRecord(
-              id: _uuid.v4(),
-              firmId: provider.activeFirm.id,
-              date: _paymentDate,
-              type: 'payment_out',
-              partyId: _selectedParty!.id,
-              partyName: _selectedParty!.name,
-              amount: amt,
-              paymentMode: _paymentMode,
-              referenceId: _refController.text.trim(),
-              description: _descController.text.trim(),
-            );
+            try {
+              final txn = TransactionRecord(
+                id: _uuid.v4(),
+                firmId: provider.activeFirm.id.isNotEmpty ? provider.activeFirm.id : 'default_firm',
+                date: _paymentDate,
+                type: 'payment_out',
+                partyId: _selectedParty!.id,
+                partyName: _selectedParty!.name,
+                amount: amt,
+                paymentMode: _paymentMode,
+                referenceId: _refController.text.trim(),
+                description: _descController.text.trim(),
+              );
 
-            // Update supplier balance (reducing payable)
-            final updatedSupplier = _selectedParty!.copyWith(
-              currentBalance: _selectedParty!.currentBalance + amt,
-            );
-            await provider.saveParty(updatedSupplier);
-            await provider.addTransaction(txn);
+              // Update supplier balance (reducing payable)
+              final updatedSupplier = _selectedParty!.copyWith(
+                currentBalance: _selectedParty!.currentBalance + amt,
+              );
+              await provider.saveParty(updatedSupplier);
+              await provider.addTransaction(txn);
 
-            if (context.mounted) {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Recorded Payment Out of ₹$amt to ${_selectedParty!.name}!')));
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  backgroundColor: AppTheme.successGreen,
+                  content: Text('Recorded Payment Out of ₹$amt to ${_selectedParty!.name}!'),
+                ));
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  backgroundColor: AppTheme.dangerRed,
+                  content: Text('Failed to save payment out: $e'),
+                ));
+              }
             }
           },
           child: const Text('Save Payment Out'),

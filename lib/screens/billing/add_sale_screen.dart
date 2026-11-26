@@ -38,6 +38,7 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
   double _tcsRate = 0.0; // 0%, 0.1%, 1%
   double _tdsRate = 0.0; // 0%, 0.1%, 1%, 2%
   bool _showEWayBillFields = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -383,16 +384,22 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.trending_up_rounded, color: AppTheme.successGreen, size: 16),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Estimated Invoice Profit: ${AppTheme.currency.format(_totalProfit)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.successGreen),
-                        ),
-                      ],
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.trending_up_rounded, color: AppTheme.successGreen, size: 16),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              'Estimated Invoice Profit: ${AppTheme.currency.format(_totalProfit)}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.successGreen),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       'Margin: ${_profitMarginPercent.toStringAsFixed(1)}%',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.successGreen),
@@ -416,12 +423,20 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.local_shipping_outlined, size: 18, color: Colors.indigo.shade800),
-                        const SizedBox(width: 8),
-                        const Text('E-Way Bill & Transport Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      ],
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(Icons.local_shipping_outlined, size: 18, color: Colors.indigo.shade800),
+                          const SizedBox(width: 8),
+                          const Flexible(
+                            child: Text(
+                              'E-Way Bill & Transport Details',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     Icon(_showEWayBillFields ? Icons.expand_less : Icons.expand_more),
                   ],
@@ -579,9 +594,15 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
                       backgroundColor: AppTheme.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    icon: const Icon(Icons.save_rounded),
-                    label: const Text('Save & Preview Bill'),
-                    onPressed: _billItems.isEmpty ? null : () => _saveInvoice(context, shareDirect: false),
+                    icon: _isSaving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.save_rounded),
+                    label: Text(_isSaving ? 'Saving...' : 'Save & Preview Bill'),
+                    onPressed: (_billItems.isEmpty || _isSaving) ? null : () => _saveInvoice(context, shareDirect: false),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -591,9 +612,15 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
                       backgroundColor: const Color(0xFF25D366), // WhatsApp Green
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    icon: const Icon(Icons.share_rounded),
-                    label: const Text('Save & WhatsApp'),
-                    onPressed: _billItems.isEmpty ? null : () => _saveInvoice(context, shareDirect: true),
+                    icon: _isSaving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.share_rounded),
+                    label: Text(_isSaving ? 'Saving...' : 'Save & WhatsApp'),
+                    onPressed: (_billItems.isEmpty || _isSaving) ? null : () => _saveInvoice(context, shareDirect: true),
                   ),
                 ),
               ],
@@ -687,11 +714,15 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<Item>(
                     value: selectedItem,
+                    isExpanded: true,
                     decoration: const InputDecoration(labelText: 'Product / Item'),
                     items: availableItems.map((it) {
                       return DropdownMenuItem(
                         value: it,
-                        child: Text('${it.name} (₹${it.salePrice} • Stock: ${it.stockQuantity} ${it.unit})'),
+                        child: Text(
+                          '${it.name} (₹${it.salePrice} • Stock: ${it.stockQuantity} ${it.unit})',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       );
                     }).toList(),
                     onChanged: (val) {
@@ -738,7 +769,13 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('GST (${itemTaxRate.toStringAsFixed(0)}%): ₹${taxAmount.toStringAsFixed(2)}'),
+                            Flexible(
+                              child: Text(
+                                'GST (${itemTaxRate.toStringAsFixed(0)}%): ₹${taxAmount.toStringAsFixed(2)}',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Text('Row Total: ₹${totalRow.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
@@ -746,7 +783,14 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Cost: ₹${selectedItem.purchasePrice.toStringAsFixed(2)}', style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                            Flexible(
+                              child: Text(
+                                'Cost: ₹${selectedItem.purchasePrice.toStringAsFixed(2)}',
+                                style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Text('Est. Profit: +₹${itemProfit.toStringAsFixed(2)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.successGreen)),
                           ],
                         ),
@@ -795,87 +839,136 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
     );
   }
 
-  void _saveInvoice(BuildContext context, {required bool shareDirect}) async {
-    final provider = context.read<AppProvider>();
-    final business = provider.business;
-
-    final invoiceId = const Uuid().v4();
-    final itemsWithInvId = _billItems.map((it) {
-      return InvoiceItem(
-        id: it.id,
-        invoiceId: invoiceId,
-        itemId: it.itemId,
-        itemName: it.itemName,
-        hsnCode: it.hsnCode,
-        quantity: it.quantity,
-        unit: it.unit,
-        unitPrice: it.unitPrice,
-        purchasePrice: it.purchasePrice,
-        taxRate: it.taxRate,
-        cgstAmount: it.cgstAmount,
-        sgstAmount: it.sgstAmount,
-        igstAmount: it.igstAmount,
-        totalAmount: it.totalAmount,
-        batchNumber: it.batchNumber,
-        serialNumber: it.serialNumber,
+  Future<void> _saveInvoice(BuildContext context, {required bool shareDirect}) async {
+    if (_isSaving) return;
+    if (_billItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please add at least one item to the invoice')),
       );
-    }).toList();
-
-    final status = _balanceDue <= 0
-        ? 'paid'
-        : (_receivedAmount > 0 ? 'partial' : 'unpaid');
-
-    final invoice = Invoice(
-      id: invoiceId,
-      firmId: provider.activeFirm.id,
-      invoiceNumber: _invoiceNumber,
-      partyId: _selectedCustomer?.id,
-      partyName: _selectedCustomer?.name ?? 'Cash Customer',
-      partyPhone: _selectedCustomer?.phone ?? '',
-      partyAddress: _selectedCustomer?.address ?? '',
-      partyState: _selectedCustomer?.state ?? business.state,
-      partyGstin: _selectedCustomer?.gstin ?? '',
-      invoiceDate: _invoiceDate,
-      paymentMode: _paymentMode,
-      subtotal: _subtotal,
-      cgstAmount: _cgstTotal,
-      sgstAmount: _sgstTotal,
-      igstAmount: _igstTotal,
-      tcsRate: _tcsRate,
-      tcsAmount: _tcsAmount,
-      tdsRate: _tdsRate,
-      tdsAmount: _tdsAmount,
-      totalAmount: _grandTotal,
-      receivedAmount: _receivedAmount,
-      balanceAmount: _balanceDue,
-      profitAmount: _totalProfit,
-      status: status,
-      notes: _notesController.text.trim(),
-      ewayBillNumber: _ewayBillController.text.trim(),
-      vehicleNumber: _vehicleController.text.trim(),
-      transporterName: _transporterController.text.trim(),
-      hideBranding: provider.hideBranding,
-      items: itemsWithInvId,
-    );
-
-    final navigator = Navigator.of(context);
-    await provider.createInvoice(invoice);
-
-    // If converted from challan/order, mark it converted
-    if (widget.initialChallan != null) {
-      await provider.updateOrderChallanStatus(widget.initialChallan!.id, 'converted_to_sale');
+      return;
     }
 
-    if (shareDirect) {
-      await ShareService.shareInvoiceViaWhatsApp(business: business, invoice: invoice);
-      if (mounted) {
-        navigator.pop();
+    setState(() => _isSaving = true);
+
+    try {
+      final provider = context.read<AppProvider>();
+      final business = provider.business;
+
+      String finalInvNum = _invoiceNumber.trim();
+      if (finalInvNum.isEmpty) {
+        finalInvNum = await provider.getNextInvoiceNumber();
+        if (finalInvNum.isEmpty) {
+          finalInvNum = 'INV-001';
+        }
       }
-    } else {
-      if (mounted) {
-        navigator.pushReplacement(
-          MaterialPageRoute(builder: (_) => InvoicePreviewScreen(invoice: invoice)),
+
+      final invoiceId = const Uuid().v4();
+      final itemsWithInvId = _billItems.map((it) {
+        return InvoiceItem(
+          id: it.id,
+          invoiceId: invoiceId,
+          itemId: it.itemId,
+          itemName: it.itemName,
+          hsnCode: it.hsnCode,
+          quantity: it.quantity,
+          unit: it.unit,
+          unitPrice: it.unitPrice,
+          purchasePrice: it.purchasePrice,
+          taxRate: it.taxRate,
+          cgstAmount: it.cgstAmount,
+          sgstAmount: it.sgstAmount,
+          igstAmount: it.igstAmount,
+          totalAmount: it.totalAmount,
+          batchNumber: it.batchNumber,
+          serialNumber: it.serialNumber,
         );
+      }).toList();
+
+      final status = _balanceDue <= 0
+          ? 'paid'
+          : (_receivedAmount > 0 ? 'partial' : 'unpaid');
+
+      final firmId = provider.activeFirm.id.isNotEmpty
+          ? provider.activeFirm.id
+          : 'default_firm';
+
+      final invoice = Invoice(
+        id: invoiceId,
+        firmId: firmId,
+        invoiceNumber: finalInvNum,
+        partyId: _selectedCustomer?.id,
+        partyName: _selectedCustomer?.name ?? 'Cash Customer',
+        partyPhone: _selectedCustomer?.phone ?? '',
+        partyAddress: _selectedCustomer?.address ?? '',
+        partyState: _selectedCustomer?.state ?? business.state,
+        partyGstin: _selectedCustomer?.gstin ?? '',
+        invoiceDate: _invoiceDate,
+        paymentMode: _paymentMode,
+        subtotal: _subtotal,
+        cgstAmount: _cgstTotal,
+        sgstAmount: _sgstTotal,
+        igstAmount: _igstTotal,
+        tcsRate: _tcsRate,
+        tcsAmount: _tcsAmount,
+        tdsRate: _tdsRate,
+        tdsAmount: _tdsAmount,
+        totalAmount: _grandTotal,
+        receivedAmount: _receivedAmount,
+        balanceAmount: _balanceDue,
+        profitAmount: _totalProfit,
+        status: status,
+        notes: _notesController.text.trim(),
+        ewayBillNumber: _ewayBillController.text.trim(),
+        vehicleNumber: _vehicleController.text.trim(),
+        transporterName: _transporterController.text.trim(),
+        hideBranding: provider.hideBranding,
+        items: itemsWithInvId,
+      );
+
+      final navigator = Navigator.of(context);
+      await provider.createInvoice(invoice);
+
+      // If converted from challan/order, mark it converted
+      if (widget.initialChallan != null) {
+        await provider.updateOrderChallanStatus(widget.initialChallan!.id, 'converted_to_sale');
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppTheme.successGreen,
+            content: Text('Invoice $finalInvNum Saved Successfully!'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
+      if (shareDirect) {
+        await ShareService.shareInvoiceViaWhatsApp(business: business, invoice: invoice);
+        if (mounted) {
+          navigator.pop();
+        }
+      } else {
+        if (mounted) {
+          navigator.pushReplacement(
+            MaterialPageRoute(builder: (_) => InvoicePreviewScreen(invoice: invoice)),
+          );
+        }
+      }
+    } catch (e, stack) {
+      debugPrint('Error saving invoice: $e\n$stack');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppTheme.dangerRed,
+            content: Text('Failed to save invoice: $e'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
       }
     }
   }
