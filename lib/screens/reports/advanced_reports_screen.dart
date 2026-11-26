@@ -39,6 +39,11 @@ class _AdvancedReportsScreenState extends State<AdvancedReportsScreen> with Sing
           controller: _tabController,
           isScrollable: true,
           indicatorColor: Colors.white,
+          indicatorWeight: 3.5,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           tabs: const [
             Tab(text: 'BALANCE SHEET'),
             Tab(text: 'BILLWISE PROFIT'),

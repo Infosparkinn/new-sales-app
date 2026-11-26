@@ -46,6 +46,9 @@ class _PurchaseManagementScreenState extends State<PurchaseManagementScreen> wit
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.amberAccent,
+          indicatorWeight: 3.5,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           tabs: const [
             Tab(text: 'Purchase Bills'),
             Tab(text: 'Payment Out'),

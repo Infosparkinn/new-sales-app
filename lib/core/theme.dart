@@ -36,6 +36,14 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
       ),
+      tabBarTheme: const TabBarTheme(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        indicatorColor: Colors.white,
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+      ),
       cardTheme: CardTheme(
         color: surface,
         elevation: 0.5,

@@ -44,9 +44,11 @@ class _PartiesListScreenState extends State<PartiesListScreen> with SingleTicker
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
-          indicatorWeight: 3,
+          indicatorWeight: 3.5,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           tabs: [
             Tab(text: 'CUSTOMERS (${provider.customers.length})'),
             Tab(text: 'SUPPLIERS (${provider.suppliers.length})'),
