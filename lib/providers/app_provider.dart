@@ -21,7 +21,7 @@ class AppProvider extends ChangeNotifier {
   final DatabaseService _db = DatabaseService.instance;
 
   List<Firm> _firms = [];
-  Firm _activeFirm = Firm(id: 'default_firm', name: 'My Business Store');
+  Firm _activeFirm = Firm(id: 'default_firm', name: 'Testing Sales App');
   List<Party> _parties = [];
   List<Item> _items = [];
   List<Invoice> _invoices = [];

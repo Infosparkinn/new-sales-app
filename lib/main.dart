@@ -1,8 +1,9 @@
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import 'core/theme.dart';
 import 'providers/app_provider.dart';
@@ -11,8 +12,10 @@ import 'screens/main_navigation_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize SQLite FFI for Windows desktop support
-  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+  // Initialize SQLite database factory across Web, Windows Desktop, and Mobile
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryFfiWeb;
+  } else if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
@@ -30,7 +33,7 @@ class VyaparApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppProvider()),
       ],
       child: MaterialApp(
-        title: 'Vyapar - GST Billing & Inventory',
+        title: 'Testing Sales App',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         home: const MainNavigationScreen(),

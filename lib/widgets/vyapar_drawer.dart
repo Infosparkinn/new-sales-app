@@ -47,12 +47,21 @@ class VyaparDrawer extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Colors.white24,
-                        child: Text(
-                          firm.name.isNotEmpty ? firm.name[0] : 'V',
-                          style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.asset(
+                          'assets/images/testing_sales_app_logo.jpg',
+                          width: 44,
+                          height: 44,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => CircleAvatar(
+                            radius: 22,
+                            backgroundColor: Colors.white24,
+                            child: Text(
+                              firm.name.isNotEmpty ? firm.name[0] : 'T',
+                              style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),

@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/business_profile.dart';
@@ -41,13 +42,18 @@ class DatabaseService {
   }
 
   Future<Database> _initDatabase() async {
-    if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
+    String dbPath;
+    if (kIsWeb) {
+      databaseFactory = databaseFactoryFfiWeb;
+      dbPath = 'testing_sales_app_v2.db';
+    } else {
+      if (Platform.isWindows || Platform.isLinux) {
+        sqfliteFfiInit();
+        databaseFactory = databaseFactoryFfi;
+      }
+      final docsDir = await getApplicationDocumentsDirectory();
+      dbPath = p.join(docsDir.path, 'vyapar_sales_app_v2.db');
     }
-
-    final docsDir = await getApplicationDocumentsDirectory();
-    final dbPath = p.join(docsDir.path, 'vyapar_sales_app_v2.db');
 
     final db = await openDatabase(
       dbPath,

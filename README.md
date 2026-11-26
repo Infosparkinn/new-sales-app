@@ -1,8 +1,19 @@
-# 📊 Vyapar Sales App - Complete GST Billing, Inventory & Accounting Suite
+# 📊 Testing Sales App - Complete GST Billing, Mobile POS, Inventory & Accounting Suite
 
-An offline-first, high-performance GST billing, inventory management, and business accounting application designed for Indian small & medium businesses (SMBs), retailers, wholesalers, and distributors. Fully tailored to match Vyapar app workflows, built with Flutter and SQLite.
+<p align="center">
+  <img src="docs/testing_sales_app_logo.jpg" width="128" height="128" alt="Testing Sales App Logo" style="border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);"/>
+  <br/>
+  <strong>Testing Sales App</strong>
+  <br/>
+  <em>Offline-First • Multi-Device • Web Application • Windows Desktop • Android Mobile</em>
+</p>
 
-Available on **Android** (Release APK) and **Windows Desktop** (Native x64 binary).
+An offline-first, high-performance GST billing, inventory management, point-of-sale (POS), and business accounting application designed for Indian small & medium businesses (SMBs), retailers, wholesalers, and distributors.
+
+### 🌐 Platforms Supported:
+- **Web Application:** Run directly in any modern web browser (Chrome, Edge, Safari, Firefox) via WebAssembly SQLite & IndexedDB: **[Launch Live Webapp](https://Infosparkinn.github.io/new-sales-app/app/)**
+- **Windows Desktop:** High-performance native x64 desktop software with SQLite FFI runtime (`testing_sales_app_windows.zip`).
+- **Android Mobile:** Standalone offline APK for retail counters and handheld field staff (`testing_sales_app.apk`).
 
 ---
 
@@ -153,28 +164,39 @@ The application implements enterprise multi-device licensing and role-based acce
    flutter run -d android
    ```
 
+5. **Run as Webapp:**
+   ```bash
+   flutter run -d chrome
+   ```
+
 ---
 
 ## 📦 Building Releases
 
-### Android APK:
+### 🌐 Flutter Web Application:
 ```bash
-flutter build apk --release
-# Output: build/app/outputs/flutter-apk/app-release.apk
+flutter build web --release --base-href "/new-sales-app/app/"
+# Output: build/web (packaged to testing_sales_app_webapp.zip)
 ```
 
-### Windows Desktop:
+### 📱 Android APK:
+```bash
+flutter build apk --release
+# Output: build/app/outputs/flutter-apk/app-release.apk (testing_sales_app.apk)
+```
+
+### 🖥️ Windows Desktop:
 ```bash
 flutter build windows --release
-# Output: build/windows/x64/runner/Release/new_sales_app.exe
+# Output: build/windows/x64/runner/Release/new_sales_app.exe (testing_sales_app_windows.zip)
 ```
 
 ---
 
-## 🌐 GitHub Pages Live Demo & Showcase
+## 🌐 Live Webapp & GitHub Pages
 
-Visit the landing page and documentation:
-**[https://Infosparkinn.github.io/new-sales-app/](https://Infosparkinn.github.io/new-sales-app/)**
+- **Live Web Application (Run in Browser):** **[https://Infosparkinn.github.io/new-sales-app/app/](https://Infosparkinn.github.io/new-sales-app/app/)**
+- **Landing Page & Documentation:** **[https://Infosparkinn.github.io/new-sales-app/](https://Infosparkinn.github.io/new-sales-app/)**
 
 ---
 
