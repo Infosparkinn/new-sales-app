@@ -48,7 +48,7 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> with SingleTickerPr
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Reports Hub (Vyapar Suite)'),
+        title: const Text('All Reports Hub • Testing Sales App'),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,

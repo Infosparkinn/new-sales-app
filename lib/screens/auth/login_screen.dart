@@ -137,17 +137,26 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: const Color(0xFFC62828).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.storefront,
-              color: Color(0xFFC62828),
-              size: 32,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              'assets/images/testing_sales_app_logo.jpg',
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFC62828).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.storefront,
+                  color: Color(0xFFC62828),
+                  size: 32,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -158,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   provider.activeFirm.name.isNotEmpty
                       ? provider.activeFirm.name
-                      : 'Sivan sports pro',
+                      : 'Testing Sales App',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -167,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Vyapar Multi-Device Sync Architecture',
+                  'Testing Sales App • Multi-Device Architecture',
                   style: TextStyle(
                     fontSize: 13,
                     color: Color(0xFF64748B),
