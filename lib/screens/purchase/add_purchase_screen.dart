@@ -30,7 +30,9 @@ class _PurchaseLine {
 }
 
 class AddPurchaseScreen extends StatefulWidget {
-  const AddPurchaseScreen({super.key});
+  final Party? preselectedSupplier;
+
+  const AddPurchaseScreen({super.key, this.preselectedSupplier});
 
   @override
   State<AddPurchaseScreen> createState() => _AddPurchaseScreenState();
@@ -47,6 +49,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedSupplier = widget.preselectedSupplier;
     _billNumberController.text = 'PUR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
   }
 
@@ -54,6 +57,19 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
     final suppliers = provider.suppliers;
+
+    // Synchronize selected supplier with provider list by ID
+    if (_selectedSupplier != null && suppliers.isNotEmpty) {
+      final match = suppliers.where((s) => s.id == _selectedSupplier!.id);
+      if (match.isNotEmpty) {
+        _selectedSupplier = match.first;
+      }
+    } else if (_selectedSupplier == null && widget.preselectedSupplier != null && suppliers.isNotEmpty) {
+      final match = suppliers.where((s) => s.id == widget.preselectedSupplier!.id);
+      if (match.isNotEmpty) {
+        _selectedSupplier = match.first;
+      }
+    }
 
     double grandSubtotal = _lines.fold(0.0, (sum, l) => sum + l.subtotal);
     double grandTax = _lines.fold(0.0, (sum, l) => sum + l.taxAmount);

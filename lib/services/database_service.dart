@@ -829,6 +829,7 @@ class DatabaseService {
       state: 'Tamil Nadu',
       gstin: '33AAAFM5678B1Z2',
       partyType: 'supplier',
+      openingBalance: -12500.0,
       currentBalance: -12500.0,
     );
     final p3 = Party(
@@ -986,6 +987,21 @@ class DatabaseService {
       paymentMode: 'online',
       referenceId: inv1.invoiceNumber,
       description: 'Sale Invoice ${inv1.invoiceNumber}',
+    ).toMap());
+
+    await db.insert('transactions', TransactionRecord(
+      id: _uuid.v4(),
+      firmId: 'default_firm',
+      date: DateTime.now().subtract(const Duration(days: 4)),
+      type: 'purchase',
+      partyId: p2.id,
+      partyName: p2.name,
+      amount: 12500.0,
+      paymentMode: 'credit',
+      referenceId: 'PUR-849201',
+      description: 'Inward Wholesale Goods from ${p2.name}',
+      isItcEligible: true,
+      gstin: p2.gstin,
     ).toMap());
 
     await db.insert('transactions', TransactionRecord(

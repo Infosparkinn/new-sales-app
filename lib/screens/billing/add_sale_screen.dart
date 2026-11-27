@@ -15,8 +15,9 @@ import 'invoice_preview_screen.dart';
 
 class AddSaleScreen extends StatefulWidget {
   final OrderChallan? initialChallan;
+  final Party? initialParty;
 
-  const AddSaleScreen({super.key, this.initialChallan});
+  const AddSaleScreen({super.key, this.initialChallan, this.initialParty});
 
   @override
   State<AddSaleScreen> createState() => _AddSaleScreenState();
@@ -48,6 +49,15 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
       final invNum = await provider.getNextInvoiceNumber();
       if (!mounted) return;
       setState(() => _invoiceNumber = invNum);
+
+      // Pre-fill party if navigating directly from party detail
+      if (widget.initialParty != null) {
+        final party = provider.parties.firstWhere(
+          (p) => p.id == widget.initialParty!.id,
+          orElse: () => widget.initialParty!,
+        );
+        setState(() => _selectedCustomer = party);
+      }
 
       // Pre-fill from Delivery Challan / Sale Order if converting
       if (widget.initialChallan != null) {

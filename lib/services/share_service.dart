@@ -84,18 +84,25 @@ class ShareService {
     }
   }
 
-  /// Share Ledger / Khata Reminder
+  /// Share Ledger / Khata Reminder or Statement
   static Future<void> sharePartyReminder({
     required BusinessProfile business,
     required String partyName,
     required double balanceAmount,
     String? partyPhone,
+    bool isSupplier = false,
   }) async {
-    final text = 'Dear $partyName,\n\n'
-        'This is a gentle reminder regarding your outstanding balance of *${currencyFormat.format(balanceAmount)}* with *${business.name}*.\n\n'
-        'Kindly settle the dues at your earliest convenience.\n'
-        '${business.upiId.isNotEmpty ? "Pay via UPI: ${business.upiId}\n" : ""}\n'
-        'Thank you!';
+    final text = isSupplier
+        ? 'Dear $partyName,\n\n'
+            'This is an account statement update from *${business.name}*.\n\n'
+            'Our current outstanding payable balance to you is *${currencyFormat.format(balanceAmount)}*.\n\n'
+            'Please verify with your records.\n'
+            'Thank you for your business partnership!'
+        : 'Dear $partyName,\n\n'
+            'This is a gentle reminder regarding your outstanding balance of *${currencyFormat.format(balanceAmount)}* with *${business.name}*.\n\n'
+            'Kindly settle the dues at your earliest convenience.\n'
+            '${business.upiId.isNotEmpty ? "Pay via UPI: ${business.upiId}\n" : ""}\n'
+            'Thank you!';
 
     try {
       final cleanPhone = (partyPhone ?? '').replaceAll(RegExp(r'[^0-9]'), '');
@@ -118,7 +125,7 @@ class ShareService {
       await SharePlus.instance.share(
         ShareParams(
           text: text,
-          subject: 'Payment Reminder from ${business.name}',
+          subject: isSupplier ? 'Account Statement from ${business.name}' : 'Payment Reminder from ${business.name}',
         ),
       );
     } catch (e) {

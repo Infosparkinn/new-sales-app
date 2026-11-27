@@ -353,13 +353,14 @@ class _PartiesListScreenState extends State<PartiesListScreen> with SingleTicker
                   if (party.phone.isNotEmpty) ...[
                     IconButton(
                       icon: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF25D366), size: 20),
-                      tooltip: 'WhatsApp Reminder',
+                      tooltip: party.isSupplier ? 'WhatsApp Statement' : 'WhatsApp Reminder',
                       onPressed: () {
                         ShareService.sharePartyReminder(
                           business: provider.business,
                           partyName: party.name,
-                          balanceAmount: balance,
+                          balanceAmount: balance.abs(),
                           partyPhone: party.phone,
+                          isSupplier: party.isSupplier,
                         );
                       },
                     ),
