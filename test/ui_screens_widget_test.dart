@@ -60,8 +60,8 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
       expect(find.textContaining('FY 2026-27'), findsOneWidget);
 
-      // 2. Verify Multi-Device Profile Badge in AppBar
-      expect(find.byIcon(Icons.devices_other), findsOneWidget);
+      // 2. Verify Multi-Device Profile Badge in AppBar (Desktop Admin)
+      expect(find.byIcon(Icons.desktop_windows), findsOneWidget);
 
       // 3. Verify Metric Cards: "YOU'LL GET" and "YOU'LL PAY"
       expect(find.text("YOU'LL GET"), findsOneWidget);
@@ -71,10 +71,10 @@ void main() {
       expect(find.text('+ Sale Bill'), findsOneWidget);
       expect(find.text('+ Purchase'), findsOneWidget);
       expect(find.text('+ Payment In'), findsOneWidget);
-      expect(find.text('Mobile POS'), findsOneWidget);
+      expect(find.text('Desktop POS'), findsOneWidget);
     });
 
-    testWidgets('2. LoginScreen displays 1 Desktop and 3 Mobile Android logins', (WidgetTester tester) async {
+    testWidgets('2. LoginScreen displays only Desktop Version on desktop with no mobile version', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -87,29 +87,61 @@ void main() {
 
       await tester.pumpWidget(
         buildTestableWidget(
-          const LoginScreen(isSwitchingUser: false),
+          const LoginScreen(isSwitchingUser: false, forceDesktopOnly: true),
           provider,
         ),
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      // 1. Verify Screen Header & Branding
-      expect(find.text('Multi-Device Login'), findsOneWidget);
-      expect(find.text('4 of 4 Device Licenses Allocated'), findsOneWidget);
+      // 1. Verify Screen Header & Branding (Desktop only)
+      expect(find.text('Desktop Version Login'), findsOneWidget);
+      expect(find.textContaining('Desktop Version'), findsWidgets);
+      expect(find.textContaining('Licensed Master POS Terminal'), findsOneWidget);
 
-      // 2. Verify 1 Desktop Login Section
-      expect(find.textContaining('1 DESKTOP LOGIN'), findsOneWidget);
+      // 2. Verify Desktop Login Section
+      expect(find.textContaining('DESKTOP VERSION (MASTER POS COUNTER)'), findsOneWidget);
       expect(find.text('Desktop Admin (Master Counter)'), findsOneWidget);
 
-      // 3. Verify 3 Mobile Android Logins Section
-      expect(find.textContaining('3 MOBILE ANDROID LOGINS'), findsOneWidget);
-      expect(find.text('Mobile User 1 (Sales Executive)'), findsOneWidget);
-      expect(find.text('Mobile User 2 (Delivery & Field Agent)'), findsOneWidget);
-      expect(find.text('Mobile User 3 (Billing Assistant)'), findsOneWidget);
+      // 3. Verify Mobile Version is NOT present on desktop
+      expect(find.textContaining('MOBILE STAFF LOGINS'), findsNothing);
+      expect(find.textContaining('3 MOBILE ANDROID LOGINS'), findsNothing);
+      expect(find.text('Mobile User 1 (Sales Executive)'), findsNothing);
+      expect(find.text('Mobile User 2 (Delivery & Field Agent)'), findsNothing);
+      expect(find.text('Mobile User 3 (Billing Assistant)'), findsNothing);
 
       // 4. Verify Device Management icon in AppBar
       expect(find.byIcon(Icons.devices_other), findsOneWidget);
+    });
+
+    testWidgets('2b. LoginScreen displays mobile version when in mobile layout', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final provider = AppProvider();
+      await tester.runAsync(() async {
+        await provider.loadAllData();
+      });
+
+      await tester.pumpWidget(
+        buildTestableWidget(
+          const LoginScreen(isSwitchingUser: false, forceDesktopOnly: false),
+          provider,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // 1. Verify Mobile Screen Header
+      expect(find.text('Mobile Staff Login'), findsOneWidget);
+
+      // 2. Verify Mobile Staff Logins Section
+      expect(find.textContaining('MOBILE STAFF LOGINS'), findsOneWidget);
+      expect(find.text('Mobile User 1 (Sales Executive)'), findsOneWidget);
+      expect(find.text('Mobile User 2 (Delivery & Field Agent)'), findsOneWidget);
+      expect(find.text('Mobile User 3 (Billing Assistant)'), findsOneWidget);
     });
 
     testWidgets('3. DeviceManagementScreen renders terminal cards and permissions matrix', (WidgetTester tester) async {
@@ -132,8 +164,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      // 1. Verify Title & Summary
-      expect(find.text('Device & Session Manager'), findsOneWidget);
+      // 1. Verify Title & Summary (Desktop Terminal System)
+      expect(find.text('Desktop Terminal System'), findsOneWidget);
       expect(find.text('Multi-Device Enterprise License'), findsOneWidget);
       expect(find.textContaining('4/4 SLOTS ALLOCATED'), findsOneWidget);
 
@@ -169,8 +201,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      // 1. Verify Header
-      expect(find.text('Mobile POS • Quick Counter Billing'), findsOneWidget);
+      // 1. Verify Header (Desktop POS Counter Billing)
+      expect(find.text('Desktop POS • Quick Counter Billing'), findsOneWidget);
 
       // 2. Verify Search Bar
       expect(find.byType(TextField), findsOneWidget);

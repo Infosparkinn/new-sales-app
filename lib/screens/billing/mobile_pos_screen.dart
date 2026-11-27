@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -48,10 +50,13 @@ class _MobilePosScreenState extends State<MobilePosScreen> {
     });
 
     final cartGrandTotal = cartSubtotal + cartTax;
+    final bool isDesktop = kIsWeb ||
+        (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) ||
+        MediaQuery.of(context).size.width >= 800;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mobile POS • Quick Counter Billing'),
+        title: Text(isDesktop ? 'Desktop POS • Quick Counter Billing' : 'Mobile POS • Quick Counter Billing'),
         actions: [
           if (_cart.isNotEmpty)
             IconButton(

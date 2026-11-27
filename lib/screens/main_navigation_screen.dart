@@ -105,7 +105,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                               ),
                               SizedBox(height: 2),
                               Text(
-                                'Enterprise Billing',
+                                'Desktop Version',
                                 style: TextStyle(
                                   color: Colors.white60,
                                   fontSize: 11,
@@ -274,7 +274,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                               color: AppTheme.successGreen.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.devices_other, color: AppTheme.successLight, size: 18),
+                            child: const Icon(Icons.desktop_windows_rounded, color: AppTheme.successLight, size: 18),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -288,7 +288,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const Text(
-                                  '4 Devices Synced',
+                                  'Desktop Master Terminal',
                                   style: TextStyle(color: AppTheme.successLight, fontSize: 10, fontWeight: FontWeight.w500),
                                 ),
                               ],

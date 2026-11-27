@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -34,6 +36,9 @@ class DashboardScreen extends StatelessWidget {
     final provider = context.watch<AppProvider>();
     final business = provider.business;
     final metrics = provider.metrics;
+    final bool isDesktop = kIsWeb ||
+        (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) ||
+        MediaQuery.of(context).size.width >= 800;
 
     if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -263,7 +268,7 @@ class DashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildActionButton(
                       context: context,
-                      label: "Mobile POS",
+                      label: isDesktop ? "Desktop POS" : "Mobile POS",
                       color: Colors.teal.shade700,
                       icon: Icons.point_of_sale_rounded,
                       onTap: () {

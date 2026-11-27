@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/theme.dart';
@@ -33,6 +35,9 @@ class VyaparDrawer extends StatelessWidget {
     final firm = provider.activeFirm;
     final syncInfo = provider.syncCompanyInfo;
     final syncCompanyName = syncInfo['companyName'] ?? 'Sivan sports pro';
+    final bool isDesktop = kIsWeb ||
+        (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) ||
+        MediaQuery.of(context).size.width >= 800;
 
     return Drawer(
       child: SafeArea(
@@ -210,8 +215,8 @@ class VyaparDrawer extends StatelessWidget {
                   ),
                   _drawerItem(
                     icon: Icons.point_of_sale_rounded,
-                    title: 'Mobile POS',
-                    subtitle: 'Fast Touch-Grid Billing',
+                    title: isDesktop ? 'Desktop POS Counter' : 'Mobile POS',
+                    subtitle: isDesktop ? 'Fast Touch-Grid Counter Billing' : 'Fast Touch-Grid Billing',
                     color: Colors.teal,
                     trailingBadge: 'NEW',
                     onTap: () {
@@ -410,14 +415,14 @@ class VyaparDrawer extends StatelessWidget {
                     },
                   ),
 
-                  // 12. MULTI-DEVICE LOGINS (1 Desktop + 3 Mobile)
-                  _buildSectionHeader('MULTI-DEVICE ACCESS'),
+                  // 12. MULTI-DEVICE LOGINS (Desktop Terminal vs Mobile Terminals)
+                  _buildSectionHeader(isDesktop ? 'DESKTOP TERMINAL ACCESS' : 'MULTI-DEVICE ACCESS'),
                   _drawerItem(
                     icon: Icons.switch_account_rounded,
-                    title: 'Switch Profile / Login',
-                    subtitle: '1 Desktop Admin + 3 Mobile Android Logins',
+                    title: isDesktop ? 'Desktop Profile / PIN' : 'Switch Profile / Login',
+                    subtitle: isDesktop ? 'Desktop Master Admin (Licensed Counter)' : '1 Desktop Admin + 3 Mobile Android Logins',
                     color: const Color(0xFFC62828),
-                    trailingBadge: '4 USERS',
+                    trailingBadge: isDesktop ? 'DESKTOP' : '4 USERS',
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen(isSwitchingUser: true)));
@@ -425,8 +430,8 @@ class VyaparDrawer extends StatelessWidget {
                   ),
                   _drawerItem(
                     icon: Icons.devices_other_rounded,
-                    title: 'Device & Session Manager',
-                    subtitle: '4 of 4 active licensed terminals',
+                    title: isDesktop ? 'Desktop Terminal System' : 'Device & Session Manager',
+                    subtitle: isDesktop ? 'Licensed Master Counter Terminal' : '4 of 4 active licensed terminals',
                     color: const Color(0xFF1565C0),
                     onTap: () {
                       Navigator.pop(context);

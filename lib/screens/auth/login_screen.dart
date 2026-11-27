@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_user.dart';
@@ -6,10 +8,12 @@ import 'device_management_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isSwitchingUser;
+  final bool? forceDesktopOnly;
 
   const LoginScreen({
     super.key,
     this.isSwitchingUser = false,
+    this.forceDesktopOnly,
   });
 
   @override
@@ -27,10 +31,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final desktopUser = provider.desktopUser;
     final mobileUsers = provider.mobileUsers;
 
+    final bool isDesktopVersion = widget.forceDesktopOnly ??
+        (kIsWeb ||
+            (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) ||
+            MediaQuery.of(context).size.width >= 800);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
-        title: const Text('Multi-Device Login'),
+        title: Text(isDesktopVersion ? 'Desktop Version Login' : 'Mobile Staff Login'),
         backgroundColor: const Color(0xFFC62828),
         leading: widget.isSwitchingUser
             ? IconButton(
@@ -41,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.devices_other),
-            tooltip: 'Device Manager (4 Devices)',
+            tooltip: isDesktopVersion ? 'Desktop Terminal System' : 'Device Manager (4 Devices)',
             onPressed: () {
               Navigator.push(
                 context,
@@ -62,57 +71,58 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Top Branding Banner
-                _buildHeader(provider),
+                _buildHeader(provider, isDesktopVersion: isDesktopVersion),
                 const SizedBox(height: 20),
 
                 // License Allocation Pill
-                _buildLicensePill(provider),
+                _buildLicensePill(provider, isDesktopVersion: isDesktopVersion),
                 const SizedBox(height: 24),
 
-                // 1 DESKTOP LOGIN SECTION
-                _buildSectionHeader(
-                  title: '1 DESKTOP LOGIN (Master POS Counter)',
-                  icon: Icons.computer,
-                  color: const Color(0xFF1565C0),
-                  tag: 'Full Administrator Rights',
-                ),
-                const SizedBox(height: 10),
-                if (desktopUser != null)
-                  _buildUserCard(
-                    user: desktopUser,
-                    isDesktop: true,
-                    isCurrent: provider.currentUser?.id == desktopUser.id,
+                if (isDesktopVersion) ...[
+                  // DESKTOP ONLY: Show ONLY Desktop Master Admin (No Mobile section!)
+                  _buildSectionHeader(
+                    title: 'DESKTOP VERSION (MASTER POS COUNTER)',
+                    icon: Icons.computer,
+                    color: const Color(0xFF1565C0),
+                    tag: 'Full Administrator Rights',
                   ),
-                const SizedBox(height: 28),
-
-                // 3 MOBILE ANDROID LOGINS SECTION
-                _buildSectionHeader(
-                  title: '3 MOBILE ANDROID LOGINS (Field & Staff)',
-                  icon: Icons.phone_android,
-                  color: const Color(0xFF2E7D32),
-                  tag: 'Role-Based Access',
-                ),
-                const SizedBox(height: 10),
-                if (mobileUsers.isEmpty)
-                  const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text('Loading mobile profiles...'),
+                  const SizedBox(height: 10),
+                  if (desktopUser != null)
+                    _buildUserCard(
+                      user: desktopUser,
+                      isDesktop: true,
+                      isCurrent: provider.currentUser?.id == desktopUser.id,
                     ),
-                  )
-                else
-                  ...mobileUsers.map((u) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: _buildUserCard(
-                          user: u,
-                          isDesktop: false,
-                          isCurrent: provider.currentUser?.id == u.id,
-                        ),
-                      )),
+                ] else ...[
+                  // MOBILE VERSION: Show Mobile Android staff logins
+                  _buildSectionHeader(
+                    title: 'MOBILE STAFF LOGINS (Field & Staff)',
+                    icon: Icons.phone_android,
+                    color: const Color(0xFF2E7D32),
+                    tag: 'Role-Based Access',
+                  ),
+                  const SizedBox(height: 10),
+                  if (mobileUsers.isEmpty)
+                    const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text('Loading mobile profiles...'),
+                      ),
+                    )
+                  else
+                    ...mobileUsers.map((u) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: _buildUserCard(
+                            user: u,
+                            isDesktop: false,
+                            isCurrent: provider.currentUser?.id == u.id,
+                          ),
+                        )),
+                ],
                 const SizedBox(height: 24),
 
-                // Quick Demo Login Shortcut info
-                _buildSecurityFooter(provider),
+                // Security footer
+                _buildSecurityFooter(provider, isDesktopVersion: isDesktopVersion),
               ],
             ),
           ),
@@ -121,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildHeader(AppProvider provider) {
+  Widget _buildHeader(AppProvider provider, {required bool isDesktopVersion}) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -175,9 +185,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Testing Sales App • Multi-Device Architecture',
-                  style: TextStyle(
+                Text(
+                  isDesktopVersion
+                      ? 'Testing Sales App • Desktop Version'
+                      : 'Testing Sales App • Mobile Version',
+                  style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF64748B),
                   ),
@@ -214,35 +226,43 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLicensePill(AppProvider provider) {
+  Widget _buildLicensePill(AppProvider provider, {required bool isDesktopVersion}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
+        color: isDesktopVersion ? const Color(0xFFEFF6FF) : const Color(0xFFFEF3C7),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFCD34D)),
+        border: Border.all(color: isDesktopVersion ? const Color(0xFFBFDBFE) : const Color(0xFFFCD34D)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.verified_user, color: Color(0xFFD97706), size: 22),
+          Icon(
+            Icons.verified_user,
+            color: isDesktopVersion ? const Color(0xFF1D4ED8) : const Color(0xFFD97706),
+            size: 22,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '4 of 4 Device Licenses Allocated',
+                Text(
+                  isDesktopVersion
+                      ? 'Desktop Version • Licensed Master POS Terminal'
+                      : 'Mobile Field Terminals • Role-Based Access',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF92400E),
+                    color: isDesktopVersion ? const Color(0xFF1E40AF) : const Color(0xFF92400E),
                   ),
                 ),
                 Text(
-                  '1 Windows Desktop POS + 3 Android Mobile field terminals active & ready',
+                  isDesktopVersion
+                      ? 'Full Administrator Rights • High-Performance Counter POS Active'
+                      : '3 Android Mobile field terminals active & ready',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.brown.shade800,
+                    color: isDesktopVersion ? const Color(0xFF1E3A8A) : Colors.brown.shade800,
                   ),
                 ),
               ],
@@ -257,13 +277,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               );
             },
-            icon: const Icon(Icons.settings, size: 16, color: Color(0xFF92400E)),
-            label: const Text(
+            icon: Icon(Icons.settings, size: 16, color: isDesktopVersion ? const Color(0xFF1D4ED8) : const Color(0xFF92400E)),
+            label: Text(
               'Manage',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF92400E),
+                color: isDesktopVersion ? const Color(0xFF1D4ED8) : const Color(0xFF92400E),
               ),
             ),
           ),
@@ -431,7 +451,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -449,7 +472,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Text(
                           deviceSlotLabel,
                           style: TextStyle(
@@ -790,37 +812,42 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Widget _buildSecurityFooter(AppProvider provider) {
+  Widget _buildSecurityFooter(AppProvider provider, {required bool isDesktopVersion}) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              Icon(Icons.security, size: 18, color: Color(0xFFC62828)),
-              SizedBox(width: 8),
-              Text(
-                'Enterprise Role-Based Access Control',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
+            children: [
+              Icon(Icons.security, size: 18, color: isDesktopVersion ? const Color(0xFF1565C0) : const Color(0xFFC62828)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  isDesktopVersion ? 'Enterprise Desktop POS Terminal' : 'Enterprise Role-Based Access Control',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E293B),
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            '• 1 Desktop Login has full administrative power: manage taxes, add bank accounts, edit sales prices, and generate audit reports.\n'
-            '• 3 Mobile Android logins are restricted by role (Salesman, Delivery Agent, and Counter Assistant) to safeguard sensitive finances.\n'
-            '• Data synchronizes continuously across all 4 devices via local SQLite and Vyapar Cloud sync.',
-            style: TextStyle(
+          Text(
+            isDesktopVersion
+                ? '• Desktop Version includes master counter POS, barcode scanning, thermal printing, and multi-firm ledger.\n'
+                  '• Complete financial controls: audit trails, GST filing summaries, and balance sheet reporting.\n'
+                  '• Offline-first SQLite database with automatic local and cloud backup synchronization.'
+                : '• 3 Mobile Android logins are restricted by role (Salesman, Delivery Agent, and Counter Assistant) to safeguard sensitive finances.\n'
+                  '• Data synchronizes continuously across all devices via local SQLite and Vyapar Cloud sync.',
+            style: const TextStyle(
               fontSize: 12,
               color: Color(0xFF64748B),
               height: 1.5,

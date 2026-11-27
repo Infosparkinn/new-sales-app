@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_user.dart';
@@ -17,10 +19,14 @@ class _DeviceManagementScreenState extends State<DeviceManagementScreen> {
     final users = provider.appUsers;
     final sessions = provider.deviceSessions;
 
+    final bool isDesktop = kIsWeb ||
+        (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) ||
+        MediaQuery.of(context).size.width >= 800;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
-        title: const Text('Device & Session Manager'),
+        title: Text(isDesktop ? 'Desktop Terminal System' : 'Device & Session Manager'),
         backgroundColor: const Color(0xFFC62828),
       ),
       body: SingleChildScrollView(
@@ -578,6 +584,10 @@ class _DeviceManagementScreenState extends State<DeviceManagementScreen> {
   }
 
   Widget _buildLicenseNotice(BuildContext context) {
+    final bool isDesktop = kIsWeb ||
+        (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) ||
+        MediaQuery.of(context).size.width >= 800;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -589,10 +599,12 @@ class _DeviceManagementScreenState extends State<DeviceManagementScreen> {
         children: [
           const Icon(Icons.info_outline, color: Color(0xFF2563EB)),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Your subscription includes 1 Desktop Windows Terminal and 3 Mobile Android logins. All 4 terminals are actively synchronized.',
-              style: TextStyle(
+              isDesktop
+                  ? 'Desktop Master POS Terminal active with full administrative controls, SQLite database, and automated cloud sync.'
+                  : 'Your subscription includes 1 Desktop Windows Terminal and 3 Mobile Android logins. All 4 terminals are actively synchronized.',
+              style: const TextStyle(
                 fontSize: 12,
                 color: Color(0xFF1E40AF),
               ),

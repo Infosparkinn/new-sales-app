@@ -165,8 +165,9 @@ class AppProvider extends ChangeNotifier {
       _deviceSessions = await _db.getDeviceSessions();
 
       if (_currentUser == null && _appUsers.isNotEmpty) {
-        if (!kIsWeb && Platform.isWindows) {
-          // Default to 1 Desktop Login on Windows Desktop
+        final isDesktopTarget = kIsWeb || (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux));
+        if (isDesktopTarget) {
+          // Default to Desktop Version on Desktop / Webapp
           _currentUser = _appUsers.firstWhere(
             (u) => u.deviceType == 'desktop',
             orElse: () => _appUsers.first,
