@@ -282,6 +282,188 @@ class PdfService {
     return pdf.save();
   }
 
+  /// Generate 80mm POS Thermal Slip Vector PDF
+  static Future<Uint8List> generateThermalReceiptPdf({
+    required BusinessProfile business,
+    required Invoice invoice,
+  }) async {
+    final pdf = pw.Document();
+
+    final upiUri = 'upi://pay?pa=${business.upiId.isNotEmpty ? business.upiId : 'merchant@upi'}&pn=${Uri.encodeComponent(business.name)}&am=${invoice.totalAmount.toStringAsFixed(2)}&cu=INR&tn=Invoice_${invoice.invoiceNumber}';
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.roll80,
+        margin: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              // Store Header
+              pw.Text(
+                business.name,
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+              ),
+              if (business.address.isNotEmpty)
+                pw.Text(business.address, textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 8)),
+              if (business.phone.isNotEmpty)
+                pw.Text('Tel: ${business.phone}', style: const pw.TextStyle(fontSize: 8)),
+              if (business.gstin.isNotEmpty)
+                pw.Text('GSTIN: ${business.gstin}', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 4),
+              pw.Text('------------------------------------------------', style: const pw.TextStyle(fontSize: 8)),
+              pw.Text('CASH MEMO / POS RECEIPT', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+              pw.Text('------------------------------------------------', style: const pw.TextStyle(fontSize: 8)),
+              pw.SizedBox(height: 2),
+
+              // Invoice Info Row
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('Bill #: ${invoice.invoiceNumber}', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Date: ${dateFormat.format(invoice.invoiceDate)}', style: const pw.TextStyle(fontSize: 8)),
+                ],
+              ),
+              if (invoice.partyName.isNotEmpty && invoice.partyName != 'Cash Customer') ...[
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Cust: ${invoice.partyName}', style: const pw.TextStyle(fontSize: 8)),
+                    if (invoice.partyPhone.isNotEmpty)
+                      pw.Text('Ph: ${invoice.partyPhone}', style: const pw.TextStyle(fontSize: 8)),
+                  ],
+                ),
+              ],
+              pw.SizedBox(height: 4),
+              pw.Text('------------------------------------------------', style: const pw.TextStyle(fontSize: 8)),
+
+              // Items Header
+              pw.Row(
+                children: [
+                  pw.Expanded(flex: 5, child: pw.Text('ITEM', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold))),
+                  pw.Expanded(flex: 2, child: pw.Text('QTY', textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold))),
+                  pw.Expanded(flex: 2, child: pw.Text('RATE', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold))),
+                  pw.Expanded(flex: 3, child: pw.Text('TOTAL', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold))),
+                ],
+              ),
+              pw.Text('------------------------------------------------', style: const pw.TextStyle(fontSize: 8)),
+
+              // Items Rows
+              ...invoice.items.map((item) {
+                return pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 1.5),
+                  child: pw.Row(
+                    children: [
+                      pw.Expanded(
+                        flex: 5,
+                        child: pw.Text(
+                          item.itemName,
+                          style: const pw.TextStyle(fontSize: 8),
+                          maxLines: 1,
+                        ),
+                      ),
+                      pw.Expanded(
+                        flex: 2,
+                        child: pw.Text(
+                          '${item.quantity.toInt()} ${item.unit}',
+                          textAlign: pw.TextAlign.center,
+                          style: const pw.TextStyle(fontSize: 8),
+                        ),
+                      ),
+                      pw.Expanded(
+                        flex: 2,
+                        child: pw.Text(
+                          item.unitPrice.toStringAsFixed(0),
+                          textAlign: pw.TextAlign.right,
+                          style: const pw.TextStyle(fontSize: 8),
+                        ),
+                      ),
+                      pw.Expanded(
+                        flex: 3,
+                        child: pw.Text(
+                          item.totalAmount.toStringAsFixed(2),
+                          textAlign: pw.TextAlign.right,
+                          style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+
+              pw.Text('------------------------------------------------', style: const pw.TextStyle(fontSize: 8)),
+
+              // Total Calculation
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('Items: ${invoice.items.length}', style: const pw.TextStyle(fontSize: 8)),
+                  pw.Text('Subtotal: ${currencyFormat.format(invoice.subtotal)}', style: const pw.TextStyle(fontSize: 8)),
+                ],
+              ),
+              if (invoice.cgstAmount > 0 || invoice.sgstAmount > 0)
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('GST Tax Breakdown:', style: const pw.TextStyle(fontSize: 7.5)),
+                    pw.Text('CGST+SGST: ${currencyFormat.format(invoice.cgstAmount + invoice.sgstAmount)}', style: const pw.TextStyle(fontSize: 7.5)),
+                  ],
+                ),
+              pw.SizedBox(height: 3),
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                decoration: const pw.BoxDecoration(
+                  border: pw.Border(
+                    top: pw.BorderSide(width: 0.8),
+                    bottom: pw.BorderSide(width: 0.8),
+                  ),
+                ),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('GRAND TOTAL', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(currencyFormat.format(invoice.totalAmount), style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 2),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('Paid Mode: ${invoice.paymentMode.toUpperCase()}', style: const pw.TextStyle(fontSize: 8)),
+                  pw.Text(
+                    invoice.balanceAmount <= 0 ? 'STATUS: PAID' : 'DUE: ${currencyFormat.format(invoice.balanceAmount)}',
+                    style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                  ),
+                ],
+              ),
+
+              pw.SizedBox(height: 8),
+              // UPI QR Code on Slip
+              pw.BarcodeWidget(
+                barcode: pw.Barcode.qrCode(),
+                data: upiUri,
+                width: 70,
+                height: 70,
+              ),
+              pw.SizedBox(height: 2),
+              pw.Text('Scan to Pay with UPI', style: const pw.TextStyle(fontSize: 7)),
+
+              pw.SizedBox(height: 6),
+              pw.Text('------------------------------------------------', style: const pw.TextStyle(fontSize: 8)),
+              pw.Text('Thank you for shopping with us!', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Goods once sold cannot be taken back.', style: const pw.TextStyle(fontSize: 6.5)),
+              pw.SizedBox(height: 8),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
   static Future<File?> savePdfToFile(Uint8List bytes, String filename) async {
     if (kIsWeb) return null;
     try {

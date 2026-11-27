@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/theme.dart';
+import '../models/item.dart';
 import '../models/transaction_record.dart';
 import '../providers/app_provider.dart';
+import '../widgets/keyboard_shortcuts_dialog.dart';
+import '../widgets/sales_trend_chart_widget.dart';
 import 'auth/device_management_screen.dart';
 import 'auth/login_screen.dart';
 import 'billing/add_sale_screen.dart';
@@ -118,6 +121,16 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
           IconButton(
+            icon: const Icon(Icons.keyboard_outlined),
+            tooltip: 'Desktop POS Fast-Keys (F1-F12)',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => const KeyboardShortcutsDialog(),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.devices_other),
             tooltip: 'Connected Terminals (4 Devices)',
             onPressed: () {
@@ -207,9 +220,65 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              if ((metrics['lowStockCount'] ?? 0) > 0) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFFDE68A)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Low Stock Alert: ${(metrics['lowStockCount'] ?? 0).toInt()} Items Below Minimum',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E)),
+                            ),
+                            const Text(
+                              'Reorder stock now to prevent inventory shortage at the POS counter.',
+                              style: TextStyle(fontSize: 11, color: Color(0xFFB45309)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFD97706),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const PurchaseManagementScreen()));
+                        },
+                        child: const Text('Reorder Stock'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 18),
 
-              // 3. Quick Action Buttons Grid
+              // 3. Weekly Sales Trend Analytics Chart
+              SalesTrendChartWidget(invoices: provider.invoices),
+              const SizedBox(height: 18),
+
+              // 4. Quick Action Buttons Grid
               const Text(
                 "QUICK ACTIONS",
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textSecondary, letterSpacing: 0.5),
@@ -316,7 +385,13 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 22),
 
-              // 4. Recent Transactions
+              // 5. Featured Inventory & Stock Health
+              if (provider.items.isNotEmpty) ...[
+                _buildTopSellingProductsCard(provider),
+                const SizedBox(height: 22),
+              ],
+
+              // 6. Recent Transactions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -410,8 +485,115 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(subtitle, style: const TextStyle(fontSize: 10.5, color: AppTheme.textSecondary)),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(color == AppTheme.successGreen ? Icons.arrow_downward : Icons.arrow_upward, size: 10, color: color),
+                  const SizedBox(width: 4),
+                  Text(
+                    color == AppTheme.successGreen ? 'Active Inflow' : 'Due to Vendors',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTopSellingProductsCard(AppProvider provider) {
+    final sortedItems = List<Item>.from(provider.items)..sort((a, b) => b.stockQuantity.compareTo(a.stockQuantity));
+    final topItems = sortedItems.take(3).toList();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.inventory_rounded, color: Colors.purple, size: 18),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Inventory Health & Stock Levels',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                  ),
+                ],
+              ),
+              InkWell(
+                onTap: onNavigateToItems,
+                child: const Text('View All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ...topItems.map((it) {
+            final double stockRatio = (it.stockQuantity / (it.minStockAlert <= 0 ? 100 : it.minStockAlert * 3)).clamp(0.05, 1.0);
+            final bool isLow = it.stockQuantity <= it.minStockAlert;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(it.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
+                      Text(
+                        '${it.stockQuantity.toInt()} ${it.unit} in stock',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isLow ? AppTheme.accent : AppTheme.successGreen),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: stockRatio,
+                      minHeight: 6,
+                      backgroundColor: const Color(0xFFF1F5F9),
+                      valueColor: AlwaysStoppedAnimation<Color>(isLow ? AppTheme.accent : AppTheme.primaryLight),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
       ),
     );
   }

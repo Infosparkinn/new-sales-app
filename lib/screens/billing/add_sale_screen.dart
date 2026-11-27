@@ -11,6 +11,7 @@ import '../../models/order_challan.dart';
 import '../../providers/app_provider.dart';
 import '../../services/share_service.dart';
 import '../parties/add_party_screen.dart';
+import '../../widgets/upi_qr_dialog.dart';
 import 'invoice_preview_screen.dart';
 
 class AddSaleScreen extends StatefulWidget {
@@ -636,6 +637,33 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
                 ),
               ],
             ),
+            if (_grandTotal > 0) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF059669),
+                    side: const BorderSide(color: Color(0xFF059669), width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.qr_code_2_rounded),
+                  label: const Text('Show Customer UPI QR (Instant Pay)', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => UpiQrDialog(
+                        upiId: context.read<AppProvider>().business.upiId,
+                        businessName: context.read<AppProvider>().business.name,
+                        amount: _grandTotal,
+                        invoiceNumber: _invoiceNumber.isNotEmpty ? _invoiceNumber : 'NEW',
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ],
         ),
       ),

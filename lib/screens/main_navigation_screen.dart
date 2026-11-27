@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../core/theme.dart';
 import '../providers/app_provider.dart';
+import '../widgets/keyboard_shortcuts_dialog.dart';
 import 'auth/device_management_screen.dart';
 import 'auth/login_screen.dart';
 import 'billing/add_sale_screen.dart';
@@ -247,6 +248,44 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                         _buildNavTile(3, 'Sales Invoices', Icons.receipt_long_outlined, Icons.receipt_long_rounded, badge: '${provider.invoices.length}'),
                         _buildNavTile(4, 'Reports Hub', Icons.analytics_outlined, Icons.analytics_rounded),
                       ],
+                    ),
+                  ),
+
+                  // Fast-Keys & Shortcuts Action
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    child: InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => const KeyboardShortcutsDialog(),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white.withOpacity(0.08)),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.keyboard_outlined, color: Colors.white70, size: 16),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'POS Fast-Keys',
+                                style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            Text(
+                              'F1-F12',
+                              style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
 
