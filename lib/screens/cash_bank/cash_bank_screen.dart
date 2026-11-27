@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+
 import '../../core/theme.dart';
 import '../../models/cash_bank_account.dart';
 import '../../providers/app_provider.dart';
@@ -12,24 +13,38 @@ class CashBankScreen extends StatefulWidget {
   State<CashBankScreen> createState() => _CashBankScreenState();
 }
 
-class _CashBankScreenState extends State<CashBankScreen> {
+class _CashBankScreenState extends State<CashBankScreen> with SingleTickerProviderStateMixin {
   final Uuid _uuid = const Uuid();
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
     final accounts = provider.cashBankAccounts;
 
-    final cashInHand = accounts.where((a) => a.accountType == 'cash').fold(0.0, (sum, a) => sum + a.balance);
-    final cashInGpay = accounts.where((a) => a.accountType == 'gpay').fold(0.0, (sum, a) => sum + a.balance);
-    final bankTotal = accounts.where((a) => a.accountType == 'bank').fold(0.0, (sum, a) => sum + a.balance);
-    final creditCardTotal = accounts.where((a) => a.accountType == 'credit_card').fold(0.0, (sum, a) => sum + a.balance);
+    final cashAccounts = accounts.where((a) => a.accountType == 'cash').toList();
+    final bankAccounts = accounts.where((a) => a.accountType == 'bank' || a.accountType == 'gpay' || a.accountType == 'credit_card').toList();
 
-    final totalNetBalance = cashInHand + cashInGpay + bankTotal + creditCardTotal;
+    final cashInHand = cashAccounts.fold(0.0, (sum, a) => sum + a.balance);
+    final bankTotal = accounts.where((a) => a.accountType == 'bank').fold(0.0, (sum, a) => sum + a.balance);
+    final cashInGpay = accounts.where((a) => a.accountType == 'gpay').fold(0.0, (sum, a) => sum + a.balance);
+    final totalNetBalance = accounts.fold(0.0, (sum, a) => sum + a.balance);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cash & Bank Management'),
+        title: const Text('Cash & Bank Accounts'),
         actions: [
           IconButton(
             icon: const Icon(Icons.sync_alt_rounded),
@@ -42,210 +57,236 @@ class _CashBankScreenState extends State<CashBankScreen> {
             onPressed: () => _showAddAccountDialog(context, provider),
           ),
         ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Overall Balance Hero Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primary, Color(0xFF1E3A8A)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(color: AppTheme.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('TOTAL CASH & BANK BALANCE',
-                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                  const SizedBox(height: 8),
-                  Text(AppTheme.currency.format(totalNetBalance),
-                      style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _heroMiniStat('Cash in Hand', AppTheme.currency.format(cashInHand)),
-                      _heroMiniStat('Cash in GPay', AppTheme.currency.format(cashInGpay)),
-                      _heroMiniStat('In Banks', AppTheme.currency.format(bankTotal)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Quick Transfer CTA
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _showTransferDialog(context, provider),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                icon: const Icon(Icons.swap_horiz_rounded),
-                label: const Text('TRANSFER MONEY BETWEEN ACCOUNTS', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // 1. Cash in Hand Section (Image 1)
-            _sectionHeader('CASH IN HAND', Icons.account_balance_wallet_rounded, Colors.green),
-            ...accounts.where((a) => a.accountType == 'cash').map((a) => _accountCard(context, a, provider)),
-            const SizedBox(height: 16),
-
-            // 2. Cash in GPay / UPI Section (Image 1)
-            _sectionHeader('CASH IN G PAY / UPI', Icons.qr_code_2_rounded, Colors.blue),
-            ...accounts.where((a) => a.accountType == 'gpay').map((a) => _accountCard(context, a, provider)),
-            const SizedBox(height: 16),
-
-            // 3. Bank Accounts Section (Image 1)
-            _sectionHeader('BANK ACCOUNTS', Icons.account_balance_rounded, Colors.indigo),
-            ...accounts.where((a) => a.accountType == 'bank').map((a) => _accountCard(context, a, provider)),
-            const SizedBox(height: 16),
-
-            // 4. Credit Card Section (Image 1)
-            _sectionHeader('CREDIT CARDS', Icons.credit_card_rounded, Colors.deepOrange),
-            ...accounts.where((a) => a.accountType == 'credit_card').map((a) => _accountCard(context, a, provider)),
-            const SizedBox(height: 24),
-
-            // Recent Bank Transfers
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('RECENT TRANSFERS & LOGS',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary, letterSpacing: 0.5)),
-                TextButton(
-                  onPressed: () => _showTransferDialog(context, provider),
-                  child: const Text('+ Transfer', style: TextStyle(fontSize: 12)),
-                ),
-              ],
-            ),
-            FutureBuilder<List<BankTransaction>>(
-              future: provider.getBankTransactions(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
-                }
-                final txns = snapshot.data ?? [];
-                if (txns.isEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.all(24),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border)),
-                    child: const Text('No recent transfers between accounts.', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                  );
-                }
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: txns.length.clamp(0, 5),
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, i) {
-                    final t = txns[i];
-                    return Card(
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.blue.withOpacity(0.12),
-                          child: const Icon(Icons.swap_horiz_rounded, color: Colors.blue),
-                        ),
-                        title: Text('${t.fromAccountName} ➔ ${t.toAccountName}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        subtitle: Text(AppTheme.dateFormat.format(t.date), style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-                        trailing: Text(AppTheme.currency.format(t.amount), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          indicatorWeight: 3.5,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          tabs: [
+            Tab(text: 'ALL ACCOUNTS (${accounts.length})'),
+            Tab(text: 'BANKS & GPAY (${bankAccounts.length})'),
+            Tab(text: 'CASH IN HAND (${cashAccounts.length})'),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _heroMiniStat(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.white60, fontSize: 10)),
-        const SizedBox(height: 2),
-        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-      ],
-    );
-  }
-
-  Widget _sectionHeader(String title, IconData icon, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
+      body: Column(
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
-          Text(title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color, letterSpacing: 0.5)),
+          // 1. Overall Balance Banner
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              gradient: AppTheme.darkNavyGradient,
+              boxShadow: AppTheme.softShadow,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'TOTAL CASH & BANK BALANCE',
+                            style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            AppTheme.currency.format(totalNetBalance),
+                            style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showTransferDialog(context, provider),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.accent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.swap_horiz_rounded, size: 16),
+                      label: const Text('Transfer', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Cash: ${AppTheme.shortCurrency.format(cashInHand)}', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                    Text('In Banks: ${AppTheme.shortCurrency.format(bankTotal)}', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                    Text('UPI / GPay: ${AppTheme.shortCurrency.format(cashInGpay)}', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // 2. Tab Views
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildAccountsList(accounts, provider),
+                _buildAccountsList(bankAccounts, provider, emptyTitle: 'No bank or UPI accounts registered'),
+                _buildAccountsList(cashAccounts, provider, emptyTitle: 'No cash registers registered'),
+              ],
+            ),
+          ),
         ],
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: FloatingActionButton.extended(
+          backgroundColor: AppTheme.primary,
+          foregroundColor: Colors.white,
+          elevation: 4,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Add Account', style: TextStyle(fontWeight: FontWeight.bold)),
+          onPressed: () => _showAddAccountDialog(context, provider),
+        ),
+      ),
     );
   }
 
-  Widget _accountCard(BuildContext context, CashBankAccount acc, AppProvider provider) {
-    final isNegative = acc.balance < 0;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isNegative ? Colors.red.withOpacity(0.12) : AppTheme.primary.withOpacity(0.12),
-          child: Icon(
-            acc.accountType == 'bank'
-                ? Icons.account_balance_rounded
-                : acc.accountType == 'gpay'
-                    ? Icons.qr_code_2_rounded
-                    : acc.accountType == 'credit_card'
-                        ? Icons.credit_card_rounded
-                        : Icons.wallet_rounded,
-            color: isNegative ? Colors.red : AppTheme.primary,
+  Widget _buildAccountsList(List<CashBankAccount> list, AppProvider provider, {String emptyTitle = 'No accounts found'}) {
+    if (list.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.account_balance_rounded, size: 48, color: AppTheme.primary),
+              ),
+              const SizedBox(height: 16),
+              Text(emptyTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Account'),
+                onPressed: () => _showAddAccountDialog(context, provider),
+              ),
+            ],
           ),
         ),
-        title: Text(acc.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        subtitle: Text(
-          acc.upiId.isNotEmpty
-              ? 'UPI: ${acc.upiId}'
-              : acc.accountNumber.isNotEmpty
-                  ? 'A/c: ${acc.accountNumber}${acc.ifsc.isNotEmpty ? " • IFSC: ${acc.ifsc}" : ""}'
-                  : acc.notes.isNotEmpty
-                      ? acc.notes
-                      : 'Active Account',
-          style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
-        ),
-        trailing: Text(
-          AppTheme.currency.format(acc.balance),
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-            color: isNegative ? AppTheme.dangerRed : AppTheme.successGreen,
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(14),
+      itemCount: list.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, index) {
+        final acc = list[index];
+        final isBank = acc.accountType == 'bank';
+        final isCash = acc.accountType == 'cash';
+
+        return Container(
+          decoration: AppTheme.modernCardDecoration(
+            borderRadius: 14,
+            borderColor: AppTheme.border.withOpacity(0.7),
           ),
-        ),
-      ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                // Icon Avatar
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isBank
+                        ? Colors.indigo.shade50
+                        : (isCash ? Colors.green.shade50 : Colors.teal.shade50),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    isBank ? Icons.account_balance_rounded : (isCash ? Icons.payments_rounded : Icons.qr_code_rounded),
+                    color: isBank ? Colors.indigo : (isCash ? Colors.green.shade700 : Colors.teal),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(acc.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.textPrimary)),
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              acc.accountType.replaceAll('_', ' ').toUpperCase(),
+                              style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+                            ),
+                          ),
+                          if (acc.accountNumber.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            Text('A/C: ••••${acc.accountNumber.length > 4 ? acc.accountNumber.substring(acc.accountNumber.length - 4) : acc.accountNumber}',
+                                style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Balance
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      AppTheme.currency.format(acc.balance),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: acc.balance >= 0 ? AppTheme.successGreen : AppTheme.dangerRed,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      acc.balance >= 0 ? 'Available' : 'Overdrawn',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: acc.balance >= 0 ? AppTheme.successGreen : AppTheme.dangerRed,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   void _showTransferDialog(BuildContext context, AppProvider provider) {
     final accounts = provider.cashBankAccounts;
     if (accounts.length < 2) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('At least 2 accounts are required to transfer.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('At least 2 accounts required to perform fund transfers.')));
       return;
     }
 
@@ -259,38 +300,40 @@ class _CashBankScreenState extends State<CashBankScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDlgState) => AlertDialog(
           title: const Text('Transfer Funds Between Accounts', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<String>(
-                value: fromId,
-                decoration: const InputDecoration(labelText: 'Transfer From (Source)'),
-                items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text('${a.name} (${AppTheme.currency.format(a.balance)})'))).toList(),
-                onChanged: (v) {
-                  if (v != null) setDlgState(() => fromId = v);
-                },
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: toId,
-                decoration: const InputDecoration(labelText: 'Transfer To (Destination)'),
-                items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text('${a.name} (${AppTheme.currency.format(a.balance)})'))).toList(),
-                onChanged: (v) {
-                  if (v != null) setDlgState(() => toId = v);
-                },
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Transfer Amount (₹)', prefixText: '₹ '),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descController,
-                decoration: const InputDecoration(labelText: 'Note / Reference (Optional)'),
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: fromId,
+                  decoration: const InputDecoration(labelText: 'From Account'),
+                  items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text('${a.name} (₹${a.balance.toInt()})'))).toList(),
+                  onChanged: (v) {
+                    if (v != null) setDlgState(() => fromId = v);
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: toId,
+                  decoration: const InputDecoration(labelText: 'To Account'),
+                  items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text('${a.name} (₹${a.balance.toInt()})'))).toList(),
+                  onChanged: (v) {
+                    if (v != null) setDlgState(() => toId = v);
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: amountController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(labelText: 'Transfer Amount (₹)', prefixText: '₹ '),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descController,
+                  decoration: const InputDecoration(labelText: 'Description / Reference'),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
@@ -298,10 +341,7 @@ class _CashBankScreenState extends State<CashBankScreen> {
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.white),
               onPressed: () async {
                 final amt = double.tryParse(amountController.text) ?? 0.0;
-                if (amt <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid transfer amount.')));
-                  return;
-                }
+                if (amt <= 0) return;
                 if (fromId == toId) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Source and destination accounts must be different.')));
                   return;
@@ -321,8 +361,10 @@ class _CashBankScreenState extends State<CashBankScreen> {
                   description: descController.text.trim(),
                 );
                 await provider.transferBankFunds(txn);
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Transferred ₹$amt from ${fromAcc.name} to ${toAcc.name}!')));
+                if (mounted) {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Transferred ₹$amt from ${fromAcc.name} to ${toAcc.name}!')));
+                }
               },
               child: const Text('Transfer Now'),
             ),
@@ -408,7 +450,7 @@ class _CashBankScreenState extends State<CashBankScreen> {
                   upiId: upiController.text.trim(),
                 );
                 await provider.saveCashBankAccount(acc);
-                Navigator.pop(ctx);
+                if (mounted) Navigator.pop(ctx);
               },
               child: const Text('Save Account'),
             ),

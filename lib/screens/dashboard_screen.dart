@@ -4,20 +4,20 @@ import 'package:provider/provider.dart';
 import '../core/theme.dart';
 import '../models/transaction_record.dart';
 import '../providers/app_provider.dart';
+import 'auth/device_management_screen.dart';
+import 'auth/login_screen.dart';
 import 'billing/add_sale_screen.dart';
+import 'billing/invoice_preview_screen.dart';
+import 'billing/mobile_pos_screen.dart';
+import 'cash_bank/cash_bank_screen.dart';
+import 'firms/firms_management_screen.dart';
 import 'items/add_item_screen.dart';
 import 'parties/party_detail_screen.dart';
-import 'transactions/add_payment_in_dialog.dart';
-import 'transactions/add_expense_dialog.dart';
-import 'billing/invoice_preview_screen.dart';
-import 'firms/firms_management_screen.dart';
-import '../widgets/vyapar_drawer.dart';
-import 'billing/mobile_pos_screen.dart';
 import 'purchase/purchase_management_screen.dart';
-import 'cash_bank/cash_bank_screen.dart';
 import 'reports/reports_hub_screen.dart';
-import 'auth/login_screen.dart';
-import 'auth/device_management_screen.dart';
+import 'transactions/add_expense_dialog.dart';
+import 'transactions/add_payment_in_dialog.dart';
+import '../widgets/vyapar_drawer.dart';
 
 class DashboardScreen extends StatelessWidget {
   final VoidCallback onNavigateToParties;
@@ -52,7 +52,13 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Flexible(child: Text(business.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                  Flexible(
+                    child: Text(
+                      business.name,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   const SizedBox(width: 4),
                   const Icon(Icons.arrow_drop_down, color: Colors.white70, size: 20),
                 ],
@@ -133,228 +139,223 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            // 1. You'll Get & You'll Pay Cards (Vyapar Signature)
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricCard(
-                    title: "YOU'LL GET",
-                    subtitle: "From Customers",
-                    amount: metrics['totalReceivables'] ?? 0.0,
-                    color: AppTheme.successGreen,
-                    icon: Icons.arrow_downward_rounded,
-                    onTap: onNavigateToParties,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildMetricCard(
-                    title: "YOU'LL PAY",
-                    subtitle: "To Suppliers",
-                    amount: metrics['totalPayables'] ?? 0.0,
-                    color: AppTheme.dangerRed,
-                    icon: Icons.arrow_upward_rounded,
-                    onTap: onNavigateToParties,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-
-            // 2. Secondary Quick Stats Strip
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.border),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              // 1. You'll Get & You'll Pay Cards (Vyapar Signature)
+              Row(
                 children: [
-                  _buildMiniStat(
-                    label: "Today's Sale",
-                    value: AppTheme.shortCurrency.format(metrics['todaySale'] ?? 0.0),
-                    icon: Icons.today_rounded,
-                    iconColor: AppTheme.primaryLight,
+                  Expanded(
+                    child: _buildMetricCard(
+                      title: "YOU'LL GET",
+                      subtitle: "From Customers",
+                      amount: metrics['totalReceivables'] ?? 0.0,
+                      color: AppTheme.successGreen,
+                      icon: Icons.arrow_downward_rounded,
+                      onTap: onNavigateToParties,
+                    ),
                   ),
-                  Container(width: 1, height: 30, color: AppTheme.border),
-                  _buildMiniStat(
-                    label: "Stock Value",
-                    value: AppTheme.shortCurrency.format(metrics['totalStockValue'] ?? 0.0),
-                    icon: Icons.inventory_2_outlined,
-                    iconColor: Colors.purple,
-                    onTap: onNavigateToItems,
-                  ),
-                  Container(width: 1, height: 30, color: AppTheme.border),
-                  _buildMiniStat(
-                    label: "Low Stock",
-                    value: "${(metrics['lowStockCount'] ?? 0).toInt()} items",
-                    icon: Icons.warning_amber_rounded,
-                    iconColor: (metrics['lowStockCount'] ?? 0) > 0 ? AppTheme.accent : Colors.grey,
-                    onTap: onNavigateToItems,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricCard(
+                      title: "YOU'LL PAY",
+                      subtitle: "To Suppliers",
+                      amount: metrics['totalPayables'] ?? 0.0,
+                      color: AppTheme.dangerRed,
+                      icon: Icons.arrow_upward_rounded,
+                      onTap: onNavigateToParties,
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 18),
+              const SizedBox(height: 14),
 
-            // 3. Quick Action Buttons Grid
-            const Text(
-              "QUICK ACTIONS",
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary, letterSpacing: 0.5),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    label: "+ Sale Bill",
-                    color: AppTheme.primary,
-                    icon: Icons.receipt_long_rounded,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddSaleScreen()));
-                    },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    label: "+ Payment In",
-                    color: AppTheme.successGreen,
-                    icon: Icons.payments_rounded,
-                    onTap: () => showDialog(context: context, builder: (_) => const AddPaymentInDialog()),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    label: "+ Expense",
-                    color: Colors.orange.shade800,
-                    icon: Icons.money_off_rounded,
-                    onTap: () => showDialog(context: context, builder: (_) => const AddExpenseDialog()),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    label: "+ Item",
-                    color: Colors.indigo,
-                    icon: Icons.add_box_rounded,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddItemScreen()));
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    label: "Mobile POS",
-                    color: Colors.teal.shade700,
-                    icon: Icons.point_of_sale_rounded,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MobilePosScreen()));
-                    },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    label: "+ Purchase",
-                    color: Colors.purple.shade700,
-                    icon: Icons.shopping_bag_rounded,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const PurchaseManagementScreen()));
-                    },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    label: "Cash & Bank",
-                    color: Colors.blue.shade900,
-                    icon: Icons.account_balance_rounded,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const CashBankScreen()));
-                    },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildActionButton(
-                    context: context,
-                    label: "All Reports",
-                    color: Colors.indigo.shade900,
-                    icon: Icons.bar_chart_rounded,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsHubScreen()));
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-
-            // 4. Recent Transactions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "RECENT TRANSACTIONS",
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary, letterSpacing: 0.5),
-                ),
-                Text("${provider.transactions.length} records", style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            if (provider.transactions.isEmpty)
+              // 2. Secondary Quick Stats Strip
               Container(
-                padding: const EdgeInsets.all(32),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.border),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: AppTheme.modernCardDecoration(
+                  backgroundColor: Colors.white,
+                  borderRadius: 14,
                 ),
-                child: const Column(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Icon(Icons.receipt_outlined, size: 48, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text("No transactions yet", style: TextStyle(color: AppTheme.textSecondary)),
-                    SizedBox(height: 4),
-                    Text("Create your first Sale Bill using the button above!", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    _buildMiniStat(
+                      label: "Today's Sale",
+                      value: AppTheme.shortCurrency.format(metrics['todaySale'] ?? 0.0),
+                      icon: Icons.today_rounded,
+                      iconColor: AppTheme.primaryLight,
+                    ),
+                    Container(width: 1, height: 30, color: AppTheme.border),
+                    _buildMiniStat(
+                      label: "Stock Value",
+                      value: AppTheme.shortCurrency.format(metrics['totalStockValue'] ?? 0.0),
+                      icon: Icons.inventory_2_outlined,
+                      iconColor: Colors.purple,
+                      onTap: onNavigateToItems,
+                    ),
+                    Container(width: 1, height: 30, color: AppTheme.border),
+                    _buildMiniStat(
+                      label: "Low Stock",
+                      value: "${(metrics['lowStockCount'] ?? 0).toInt()} items",
+                      icon: Icons.warning_amber_rounded,
+                      iconColor: (metrics['lowStockCount'] ?? 0) > 0 ? AppTheme.accent : Colors.grey,
+                      onTap: onNavigateToItems,
+                    ),
                   ],
                 ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: provider.transactions.length.clamp(0, 10),
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final txn = provider.transactions[index];
-                  return _buildTransactionTile(context, txn, provider);
-                },
               ),
-          ],
+              const SizedBox(height: 18),
+
+              // 3. Quick Action Buttons Grid
+              const Text(
+                "QUICK ACTIONS",
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textSecondary, letterSpacing: 0.5),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionButton(
+                      context: context,
+                      label: "+ Sale Bill",
+                      color: AppTheme.primary,
+                      icon: Icons.receipt_long_rounded,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddSaleScreen()));
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildActionButton(
+                      context: context,
+                      label: "+ Payment In",
+                      color: AppTheme.successGreen,
+                      icon: Icons.payments_rounded,
+                      onTap: () => showDialog(context: context, builder: (_) => const AddPaymentInDialog()),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildActionButton(
+                      context: context,
+                      label: "+ Expense",
+                      color: Colors.orange.shade800,
+                      icon: Icons.money_off_rounded,
+                      onTap: () => showDialog(context: context, builder: (_) => const AddExpenseDialog()),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildActionButton(
+                      context: context,
+                      label: "+ Item",
+                      color: Colors.indigo,
+                      icon: Icons.add_box_rounded,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddItemScreen()));
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionButton(
+                      context: context,
+                      label: "Mobile POS",
+                      color: Colors.teal.shade700,
+                      icon: Icons.point_of_sale_rounded,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const MobilePosScreen()));
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildActionButton(
+                      context: context,
+                      label: "+ Purchase",
+                      color: Colors.purple.shade700,
+                      icon: Icons.shopping_bag_rounded,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const PurchaseManagementScreen()));
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildActionButton(
+                      context: context,
+                      label: "Cash & Bank",
+                      color: Colors.blue.shade900,
+                      icon: Icons.account_balance_rounded,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const CashBankScreen()));
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildActionButton(
+                      context: context,
+                      label: "All Reports",
+                      color: Colors.indigo.shade900,
+                      icon: Icons.bar_chart_rounded,
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsHubScreen()));
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+
+              // 4. Recent Transactions
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "RECENT TRANSACTIONS",
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textSecondary, letterSpacing: 0.5),
+                  ),
+                  Text("${provider.transactions.length} records", style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              if (provider.transactions.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(32),
+                  alignment: Alignment.center,
+                  decoration: AppTheme.modernCardDecoration(borderRadius: 14),
+                  child: const Column(
+                    children: [
+                      Icon(Icons.receipt_outlined, size: 48, color: Colors.grey),
+                      SizedBox(height: 8),
+                      Text("No transactions yet", style: TextStyle(color: AppTheme.textSecondary)),
+                      SizedBox(height: 4),
+                      Text("Create your first Sale Bill using the button above!", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: provider.transactions.length.clamp(0, 10),
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final txn = provider.transactions[index];
+                    return _buildTransactionTile(context, txn, provider);
+                  },
+                ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildMetricCard({
     required String title,
@@ -366,20 +367,12 @@ class DashboardScreen extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3), width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+        decoration: AppTheme.modernCardDecoration(
+          borderRadius: 14,
+          borderColor: color.withOpacity(0.25),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,20 +384,27 @@ class DashboardScreen extends StatelessWidget {
                   title,
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color, letterSpacing: 0.5),
                 ),
-                Icon(icon, color: color, size: 18),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(icon, color: color, size: 16),
+                ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
                 AppTheme.currency.format(amount),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
               ),
             ),
             const SizedBox(height: 4),
-            Text(subtitle, style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+            Text(subtitle, style: const TextStyle(fontSize: 10.5, color: AppTheme.textSecondary)),
           ],
         ),
       ),
@@ -446,10 +446,11 @@ class DashboardScreen extends StatelessWidget {
   }) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
+      elevation: 1,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
@@ -478,7 +479,7 @@ class DashboardScreen extends StatelessWidget {
     switch (txn.type) {
       case 'sale':
         typeColor = AppTheme.primary;
-        typeIcon = Icons.receipt_long;
+        typeIcon = Icons.receipt_long_rounded;
         typeLabel = 'SALE';
         break;
       case 'payment_in':
@@ -488,26 +489,29 @@ class DashboardScreen extends StatelessWidget {
         break;
       case 'expense':
         typeColor = Colors.orange.shade800;
-        typeIcon = Icons.money_off;
+        typeIcon = Icons.money_off_rounded;
         typeLabel = 'EXPENSE';
         break;
       case 'purchase':
         typeColor = Colors.purple;
-        typeIcon = Icons.shopping_bag;
+        typeIcon = Icons.shopping_bag_rounded;
         typeLabel = 'PURCHASE';
         break;
       default:
         typeColor = Colors.grey;
-        typeIcon = Icons.swap_horiz;
+        typeIcon = Icons.swap_horiz_rounded;
         typeLabel = 'TXN';
     }
 
-    return Card(
-      margin: EdgeInsets.zero,
+    return Container(
+      decoration: AppTheme.modernCardDecoration(
+        borderRadius: 12,
+        borderColor: AppTheme.border.withOpacity(0.7),
+      ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         onTap: () {
           if (txn.type == 'sale' && txn.referenceId.isNotEmpty) {
-            // Find corresponding invoice
             final inv = provider.invoices.firstWhere(
               (i) => i.invoiceNumber == txn.referenceId,
               orElse: () => provider.invoices.first,
@@ -518,13 +522,18 @@ class DashboardScreen extends StatelessWidget {
             Navigator.push(context, MaterialPageRoute(builder: (_) => PartyDetailScreen(party: party)));
           }
         },
-        leading: CircleAvatar(
-          backgroundColor: typeColor.withOpacity(0.12),
+        leading: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: typeColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Icon(typeIcon, color: typeColor, size: 20),
         ),
         title: Text(
           txn.partyName.isNotEmpty ? txn.partyName : typeLabel,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
         ),
         subtitle: Text(
           '${AppTheme.dateFormat.format(txn.date)} • ${txn.paymentMode.toUpperCase()}${txn.referenceId.isNotEmpty ? " • ${txn.referenceId}" : ""}',

@@ -46,6 +46,7 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = context.read<AppProvider>();
       final invNum = await provider.getNextInvoiceNumber();
+      if (!mounted) return;
       setState(() => _invoiceNumber = invNum);
 
       // Pre-fill from Delivery Challan / Sale Order if converting
