@@ -57,7 +57,11 @@ class _AddPartyScreenState extends State<AddPartyScreen> {
     if (!_indianStates.contains(_state)) {
       _indianStates.add(_state);
     }
-    _toReceive = (p?.openingBalance ?? 0) >= 0;
+    if (p != null) {
+      _toReceive = p.openingBalance >= 0;
+    } else {
+      _toReceive = _partyType != 'supplier';
+    }
   }
 
   @override
@@ -100,7 +104,12 @@ class _AddPartyScreenState extends State<AddPartyScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                     onSelected: (val) {
-                      if (val) setState(() => _partyType = 'customer');
+                      if (val) {
+                        setState(() {
+                          _partyType = 'customer';
+                          if (widget.partyToEdit == null) _toReceive = true;
+                        });
+                      }
                     },
                   ),
                 ),
@@ -115,7 +124,12 @@ class _AddPartyScreenState extends State<AddPartyScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                     onSelected: (val) {
-                      if (val) setState(() => _partyType = 'supplier');
+                      if (val) {
+                        setState(() {
+                          _partyType = 'supplier';
+                          if (widget.partyToEdit == null) _toReceive = false;
+                        });
+                      }
                     },
                   ),
                 ),

@@ -497,8 +497,13 @@ class DashboardScreen extends StatelessWidget {
         typeIcon = Icons.shopping_bag_rounded;
         typeLabel = 'PURCHASE';
         break;
+      case 'payment_out':
+        typeColor = AppTheme.dangerRed;
+        typeIcon = Icons.arrow_upward_rounded;
+        typeLabel = 'PAYMENT OUT';
+        break;
       default:
-        typeColor = Colors.grey;
+        typeColor = Colors.blueGrey;
         typeIcon = Icons.swap_horiz_rounded;
         typeLabel = 'TXN';
     }
@@ -512,14 +517,25 @@ class DashboardScreen extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         onTap: () {
           if (txn.type == 'sale' && txn.referenceId.isNotEmpty) {
-            final inv = provider.invoices.firstWhere(
-              (i) => i.invoiceNumber == txn.referenceId,
-              orElse: () => provider.invoices.first,
-            );
-            Navigator.push(context, MaterialPageRoute(builder: (_) => InvoicePreviewScreen(invoice: inv)));
-          } else if (txn.partyId != null) {
-            final party = provider.parties.firstWhere((p) => p.id == txn.partyId, orElse: () => provider.parties.first);
-            Navigator.push(context, MaterialPageRoute(builder: (_) => PartyDetailScreen(party: party)));
+            final invMatches = provider.invoices.where((i) => i.invoiceNumber.toLowerCase() == txn.referenceId.toLowerCase());
+            if (invMatches.isNotEmpty) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => InvoicePreviewScreen(invoice: invMatches.first)));
+              return;
+            }
+          }
+          if (txn.partyId != null) {
+            final partyMatches = provider.parties.where((p) => p.id == txn.partyId);
+            if (partyMatches.isNotEmpty) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => PartyDetailScreen(party: partyMatches.first)));
+              return;
+            }
+          }
+          if (txn.partyName.isNotEmpty) {
+            final nameMatches = provider.parties.where((p) => p.name.toLowerCase() == txn.partyName.toLowerCase());
+            if (nameMatches.isNotEmpty) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => PartyDetailScreen(party: nameMatches.first)));
+              return;
+            }
           }
         },
         leading: Container(

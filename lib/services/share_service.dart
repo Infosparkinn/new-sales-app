@@ -133,6 +133,52 @@ class ShareService {
     }
   }
 
+  /// Share Service / Maintenance / Warranty Reminder
+  static Future<void> shareServiceReminder({
+    required BusinessProfile business,
+    required String customerName,
+    required String serviceTitle,
+    required DateTime dueDate,
+    String? customerPhone,
+    String? description,
+  }) async {
+    final text = 'Dear $customerName,\n\n'
+        'This is a friendly service reminder from *${business.name}*.\n\n'
+        '📌 Service: *$serviceTitle*\n'
+        '📅 Scheduled Due Date: *${DateFormat('dd MMM yyyy').format(dueDate)}*\n'
+        '${description != null && description.isNotEmpty ? "Details: $description\n" : ""}\n'
+        'Please feel free to reach out to us at ${business.phone} to schedule your appointment or confirm.\n\n'
+        'Thank you!';
+
+    try {
+      final cleanPhone = (customerPhone ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+      String whatsappUrl;
+      if (cleanPhone.isNotEmpty) {
+        final phoneWithCountry = cleanPhone.length == 10 ? '91$cleanPhone' : cleanPhone;
+        whatsappUrl = 'https://wa.me/$phoneWithCountry?text=${Uri.encodeComponent(text)}';
+      } else {
+        whatsappUrl = 'https://api.whatsapp.com/send?text=${Uri.encodeComponent(text)}';
+      }
+      final uri = Uri.parse(whatsappUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      debugPrint('WhatsApp service reminder launch error: $e');
+    }
+
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          text: text,
+          subject: 'Service Reminder: $serviceTitle',
+        ),
+      );
+    } catch (e) {
+      debugPrint('SharePlus service reminder fallback error: $e');
+    }
+  }
+
   /// Send transaction alert message to self
   static Future<void> shareSelfTransactionAlert({
     required Firm firm,

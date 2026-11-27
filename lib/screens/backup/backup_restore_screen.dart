@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -140,23 +141,34 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     setState(() => _isBackingUp = true);
     try {
       final jsonStr = await provider.exportBackupJson();
-      final docsDir = await getApplicationDocumentsDirectory();
       final fileName = 'vyapar_backup_${DateTime.now().millisecondsSinceEpoch}.json';
-      final file = File('${docsDir.path}/$fileName');
-      await file.writeAsString(jsonStr);
 
-      setState(() => _lastBackupPath = file.path);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Backup successfully saved to ${file.path}!')),
-        );
+      if (kIsWeb) {
+        await ShareService.shareText(text: jsonStr, subject: fileName);
+        setState(() => _lastBackupPath = 'Downloaded via Web Share ($fileName)');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Backup $fileName generated!')),
+          );
+        }
+      } else {
+        final docsDir = await getApplicationDocumentsDirectory();
+        final file = File('${docsDir.path}/$fileName');
+        await file.writeAsString(jsonStr);
+
+        setState(() => _lastBackupPath = file.path);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Backup successfully saved to ${file.path}!')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup failed: $e')));
       }
     } finally {
-      setState(() => _isBackingUp = false);
+      if (mounted) setState(() => _isBackingUp = false);
     }
   }
 

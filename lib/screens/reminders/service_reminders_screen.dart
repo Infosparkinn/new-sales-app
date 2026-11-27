@@ -193,11 +193,13 @@ class _ServiceRemindersScreenState extends State<ServiceRemindersScreen> with Si
                         icon: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF25D366), size: 20),
                         tooltip: 'Send WhatsApp Reminder',
                         onPressed: () {
-                          ShareService.sharePartyReminder(
+                          ShareService.shareServiceReminder(
                             business: provider.business,
-                            partyName: rem.customerName,
-                            balanceAmount: 0.0,
-                            partyPhone: rem.customerPhone,
+                            customerName: rem.customerName,
+                            serviceTitle: rem.title,
+                            dueDate: rem.dueDate,
+                            customerPhone: rem.customerPhone,
+                            description: rem.description,
                           );
                         },
                       ),

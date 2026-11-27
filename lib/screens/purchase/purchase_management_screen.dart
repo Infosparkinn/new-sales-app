@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme.dart';
 import '../../providers/app_provider.dart';
+import '../parties/party_detail_screen.dart';
 import 'add_purchase_screen.dart';
 import 'add_payment_out_dialog.dart';
 
@@ -21,6 +22,9 @@ class _PurchaseManagementScreenState extends State<PurchaseManagementScreen> wit
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this, initialIndex: widget.initialTabIndex);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -156,6 +160,12 @@ class _PurchaseManagementScreenState extends State<PurchaseManagementScreen> wit
         final p = purchases[i];
         return Card(
           child: ListTile(
+            onTap: () {
+              final party = provider.parties.where((pt) => pt.id == p.partyId || (pt.name.toLowerCase() == p.partyName.toLowerCase()));
+              if (party.isNotEmpty) {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => PartyDetailScreen(party: party.first)));
+              }
+            },
             leading: CircleAvatar(
               backgroundColor: Colors.purple.withOpacity(0.12),
               child: const Icon(Icons.shopping_bag_rounded, color: Colors.purple, size: 20),
@@ -200,6 +210,12 @@ class _PurchaseManagementScreenState extends State<PurchaseManagementScreen> wit
         final p = paymentsOut[i];
         return Card(
           child: ListTile(
+            onTap: () {
+              final party = provider.parties.where((pt) => pt.id == p.partyId || (pt.name.toLowerCase() == p.partyName.toLowerCase()));
+              if (party.isNotEmpty) {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => PartyDetailScreen(party: party.first)));
+              }
+            },
             leading: CircleAvatar(
               backgroundColor: Colors.red.withOpacity(0.12),
               child: const Icon(Icons.arrow_upward_rounded, color: Colors.red, size: 20),
